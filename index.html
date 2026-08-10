@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sistem Generator LHV TKDN & BMP - BBSPJPPI</title>
+<link rel="icon" href="data:,">
+<meta name="description" content="Aplikasi generator Laporan Hasil Verifikasi (LHV) TKDN dan BMP, berjalan sepenuhnya di browser." />
+
+<!-- React -->
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<!-- Babel standalone: agar app.jsx (JSX) bisa langsung dijalankan browser tanpa proses build -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js"></script>
+
+<!-- JSZip: baca/tulis file .docx (format ZIP) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<!-- Nunjucks: mesin templating bergaya Jinja2 (kompatibel dengan sintaks {{ }} {% %} di template Word) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/nunjucks/3.2.4/nunjucks.min.js"></script>
+<!-- pdf.js: merender halaman PDF menjadi gambar (pengganti ekstraksi gambar PDF di backend Python) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+</script>
+<!-- SheetJS: membaca isi file Excel (.xlsx/.xls) supaya bisa digambar sebagai tabel -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<style>
+  body { margin: 0; background-color: #f4f6f9; }
+</style>
+<script>
+  // Penangkap error global: memastikan TIDAK ADA kegagalan yang "diam-diam"
+  // (baik error sinkron maupun Promise yang gagal tanpa .catch)
+  function showFatalError(title, detail) {
+    let box = document.getElementById('fatal-error-box');
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'fatal-error-box';
+      box.style.cssText =
+        'position:fixed;top:0;left:0;right:0;z-index:99999;background:#c62828;color:#fff;' +
+        'padding:16px 20px;font-family:Arial,sans-serif;font-size:14px;white-space:pre-wrap;' +
+        'box-shadow:0 2px 10px rgba(0,0,0,0.3);max-height:50vh;overflow:auto;';
+      document.body.prepend(box);
+    }
+    box.innerHTML = '<strong>⚠ ' + title + '</strong><br>' + String(detail || '').replace(/</g, '&lt;');
+  }
+  window.addEventListener('error', function (e) {
+    showFatalError('Terjadi error di aplikasi', (e.message || '') + '\n' + (e.filename ? (e.filename + ':' + e.lineno) : ''));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    const reason = e.reason;
+    showFatalError('Proses gagal (unhandled rejection)', (reason && (reason.stack || reason.message)) || String(reason));
+  });
+</script>
+</head>
+<body>
+  <div id="root">
+    <div style="text-align:center; padding:60px; font-family:Arial; color:#777;">Memuat aplikasi...</div>
+  </div>
+
+  <script src="docx-engine.js"></script>
+  <script src="excel-render.js"></script>
+  <script src="app-logic.js"></script>
+  <script src="cover-generator.js"></script>
+  <script type="text/babel" data-presets="react" src="app.jsx"></script>
+
+  <script type="text/babel" data-presets="react">
+    try {
+      if (typeof App === 'undefined') {
+        throw new Error('Komponen App tidak berhasil dimuat dari app.jsx (kemungkinan file app.jsx gagal diambil atau ada error saat proses transpile Babel).');
+      }
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(<App />);
+    } catch (err) {
+      console.error(err);
+      showFatalError('Aplikasi gagal dimuat', err.message || String(err));
+    }
+  </script>
+</body>
+</html>
