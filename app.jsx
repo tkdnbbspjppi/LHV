@@ -776,6 +776,7 @@ function App() {
                   <div style={{ marginTop: '12px' }}>
                     <label style={{ fontWeight: 'bold', fontSize: '13px' }}>Deskripsi KBLI (untuk cover, opsional):</label>
                     <input type="text" value={kbliDeskripsi} onChange={(e) => setKbliDeskripsi(e.target.value)} placeholder="Contoh: Industri Alat Kesehatan Dalam Subgolongan 2101" style={inputStyle}/>
+                    <span style={{ fontSize: '11px', color: '#888', display: 'block', marginTop: '4px' }}>Isi nama/deskripsinya saja, TANPA mengulang kode KBLI (kode sudah otomatis ditampilkan dari field "KBLI" di atas)</span>
                   </div>
                   <div style={{ marginTop: '12px' }}>
                     <label style={{ fontWeight: 'bold', fontSize: '13px' }}>Nama Lembaga (subjudul cover):</label>

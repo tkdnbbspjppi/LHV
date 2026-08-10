@@ -300,12 +300,32 @@
     ty += 32;
     ctx.font = '21px Arial, sans-serif';
     ctx.fillStyle = TEXT_SOFT;
-    ctx.fillText('KBLI ' + (kbliKode || '-'), rightX, ty);
-    ty += 28;
-    wrapText(ctx, kbliDeskripsi || '', rightW).forEach((line) => {
-      ctx.fillText(line, rightX, ty);
+
+    // Cegah duplikasi: kalau "Deskripsi KBLI" ternyata sudah memuat kode
+    // KBLI itu sendiri (mis. user isi "21015-Industri Alat Kesehatan..."),
+    // jangan tampilkan "KBLI {kode}" dan deskripsi terpisah (akan dobel) --
+    // cukup tampilkan satu baris gabungan.
+    const normKode = String(kbliKode || '').trim();
+    const normDesk = String(kbliDeskripsi || '').trim();
+    const ringkasKode = normKode.toLowerCase().replace(/[\s-]/g, '');
+    const ringkasDesk = normDesk.toLowerCase().replace(/[\s-]/g, '');
+    const deskSudahMemuatKode = normKode && normDesk && ringkasDesk.includes(ringkasKode);
+
+    if (deskSudahMemuatKode) {
+      wrapText(ctx, 'KBLI ' + normDesk, rightW).forEach((line) => {
+        ctx.fillText(line, rightX, ty);
+        ty += 28;
+      });
+    } else {
+      ctx.fillText('KBLI ' + (normKode || '-'), rightX, ty);
       ty += 28;
-    });
+      if (normDesk) {
+        wrapText(ctx, normDesk, rightW).forEach((line) => {
+          ctx.fillText(line, rightX, ty);
+          ty += 28;
+        });
+      }
+    }
     ty += 30;
 
     ctx.font = 'bold 21px Arial, sans-serif';
