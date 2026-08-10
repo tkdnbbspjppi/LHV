@@ -113,6 +113,50 @@ const KELOMPOK_BARANG_OPTIONS = [
   'Barang Lainnya',
 ];
 
+// ==========================================
+// KONVERSI ANGKA -> TERBILANG (Bahasa Indonesia)
+// ==========================================
+function angkaKeTeks(n) {
+  n = Math.floor(Math.abs(n));
+  const satuan = ['', 'satu', 'dua', 'tiga', 'empat', 'lima', 'enam', 'tujuh', 'delapan', 'sembilan', 'sepuluh', 'sebelas'];
+  if (n < 12) return satuan[n];
+  if (n < 20) return angkaKeTeks(n - 10) + ' belas';
+  if (n < 100) return (angkaKeTeks(Math.floor(n / 10)) + ' puluh' + (n % 10 !== 0 ? ' ' + angkaKeTeks(n % 10) : '')).trim();
+  if (n < 200) return ('seratus' + (n % 100 !== 0 ? ' ' + angkaKeTeks(n % 100) : '')).trim();
+  if (n < 1000) return (angkaKeTeks(Math.floor(n / 100)) + ' ratus' + (n % 100 !== 0 ? ' ' + angkaKeTeks(n % 100) : '')).trim();
+  if (n < 2000) return ('seribu' + (n % 1000 !== 0 ? ' ' + angkaKeTeks(n % 1000) : '')).trim();
+  if (n < 1000000) return (angkaKeTeks(Math.floor(n / 1000)) + ' ribu' + (n % 1000 !== 0 ? ' ' + angkaKeTeks(n % 1000) : '')).trim();
+  if (n < 1000000000) return (angkaKeTeks(Math.floor(n / 1000000)) + ' juta' + (n % 1000000 !== 0 ? ' ' + angkaKeTeks(n % 1000000) : '')).trim();
+  return String(n);
+}
+
+// Ubah nilai persentase (mis. "42.74" atau "42,74") jadi terbilang lengkap
+// dengan kata "persen" di akhir, mis: "empat puluh dua koma tujuh puluh empat persen"
+function nilaiKeTerbilangPersen(nilaiInput) {
+  if (nilaiInput === null || nilaiInput === undefined) return '';
+  const cleaned = String(nilaiInput).trim().replace('%', '').replace(',', '.');
+  if (cleaned === '') return '';
+  const num = parseFloat(cleaned);
+  if (isNaN(num)) return '';
+
+  const parts = cleaned.split('.');
+  const intPart = parseInt(parts[0], 10) || 0;
+  let hasil = intPart === 0 ? 'nol' : angkaKeTeks(intPart);
+
+  if (parts.length > 1 && parts[1] !== '' && parseInt(parts[1], 10) !== 0) {
+    const decStr = parts[1];
+    let decWords;
+    if (decStr[0] === '0' && decStr.length > 1) {
+      // ada nol di depan (mis. ",05") -> sebut "nol" dulu baru sisa angkanya
+      decWords = 'nol ' + angkaKeTeks(parseInt(decStr.slice(1), 10));
+    } else {
+      decWords = angkaKeTeks(parseInt(decStr, 10));
+    }
+    hasil += ' koma ' + decWords;
+  }
+  return hasil + ' persen';
+}
+
 function App() {
   const [activeTab, setActiveTab] = useState(1) // Buka Menu 1
   const [status, setStatus] = useState('')
@@ -977,7 +1021,7 @@ function App() {
               <div style={{ ...sectionStyle, borderColor: '#009688', backgroundColor: '#e0f2f1' }}>
                 <h4 style={{ ...sectionTitle, color: '#004d40', borderColor: '#b2dfdb' }}>D. Capaian Nilai Bobot Manfaat Perusahaan (BMP)</h4>
                 <div style={grid2Col}>
-                  <div><label style={{ fontWeight: 'bold', fontSize: '13px' }}>Total Nilai BMP Akhir (%):</label><input type="number" step="0.01" value={nilaiBmp} onChange={(e) => setNilaiBmp(e.target.value)} style={inputStyle} /></div>
+                  <div><label style={{ fontWeight: 'bold', fontSize: '13px' }}>Total Nilai BMP Akhir (%):</label><input type="number" step="0.01" value={nilaiBmp} onChange={(e) => setNilaiBmp(e.target.value)} onBlur={(e) => setTerbilangBmp(nilaiKeTerbilangPersen(e.target.value))} style={inputStyle} /></div>
                   <div><label style={{ fontWeight: 'bold', fontSize: '13px' }}>Terbilang (Nilai BMP):</label><input type="text" value={terbilangBmp} onChange={(e) => setTerbilangBmp(e.target.value)} style={inputStyle} /></div>
                 </div>
               </div>
@@ -985,9 +1029,9 @@ function App() {
               <div style={sectionStyle}>
                 <h4 style={sectionTitle}>D. Hasil Nilai TKDN & Brainware</h4>
                 <div style={grid2Col}>
-                  <div><label style={{ fontWeight: 'bold', fontSize: '13px' }}>Nilai TKDN (%):</label><input type="number" step="0.01" value={nilaiTkdn} onChange={(e) => setNilaiTkdn(e.target.value)} style={inputStyle} /></div>
+                  <div><label style={{ fontWeight: 'bold', fontSize: '13px' }}>Nilai TKDN (%):</label><input type="number" step="0.01" value={nilaiTkdn} onChange={(e) => setNilaiTkdn(e.target.value)} onBlur={(e) => setTerbilangTkdn(nilaiKeTerbilangPersen(e.target.value))} style={inputStyle} /></div>
                   <div><label style={{ fontWeight: 'bold', fontSize: '13px' }}>Terbilang (TKDN):</label><input type="text" value={terbilangTkdn} onChange={(e) => setTerbilangTkdn(e.target.value)} style={inputStyle} /></div>
-                  <div><label style={{ fontWeight: 'bold', fontSize: '13px' }}>Nilai Brainware (%):</label><input type="number" step="0.01" value={nilaiBrainware} onChange={(e) => setNilaiBrainware(e.target.value)} style={inputStyle} /></div>
+                  <div><label style={{ fontWeight: 'bold', fontSize: '13px' }}>Nilai Brainware (%):</label><input type="number" step="0.01" value={nilaiBrainware} onChange={(e) => setNilaiBrainware(e.target.value)} onBlur={(e) => setTerbilangBrainware(nilaiKeTerbilangPersen(e.target.value))} style={inputStyle} /></div>
                   <div><label style={{ fontWeight: 'bold', fontSize: '13px' }}>Terbilang (Brainware):</label><input type="text" value={terbilangBrainware} onChange={(e) => setTerbilangBrainware(e.target.value)} style={inputStyle} /></div>
                 </div>
               </div>
