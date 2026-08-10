@@ -132,6 +132,8 @@ function angkaKeTeks(n) {
 
 // Ubah nilai persentase (mis. "42.74" atau "42,74") jadi terbilang lengkap
 // dengan kata "persen" di akhir, mis: "empat puluh dua koma tujuh puluh empat persen"
+const DIGIT_KATA = ['nol', 'satu', 'dua', 'tiga', 'empat', 'lima', 'enam', 'tujuh', 'delapan', 'sembilan'];
+
 function nilaiKeTerbilangPersen(nilaiInput) {
   if (nilaiInput === null || nilaiInput === undefined) return '';
   const cleaned = String(nilaiInput).trim().replace('%', '').replace(',', '.');
@@ -144,14 +146,10 @@ function nilaiKeTerbilangPersen(nilaiInput) {
   let hasil = intPart === 0 ? 'nol' : angkaKeTeks(intPart);
 
   if (parts.length > 1 && parts[1] !== '' && parseInt(parts[1], 10) !== 0) {
-    const decStr = parts[1];
-    let decWords;
-    if (decStr[0] === '0' && decStr.length > 1) {
-      // ada nol di depan (mis. ",05") -> sebut "nol" dulu baru sisa angkanya
-      decWords = 'nol ' + angkaKeTeks(parseInt(decStr.slice(1), 10));
-    } else {
-      decWords = angkaKeTeks(parseInt(decStr, 10));
-    }
+    // Desimal dibaca PER DIGIT (bukan sebagai angka puluhan), sesuai konvensi
+    // baku penulisan terbilang persentase -- mis. ",74" -> "tujuh empat"
+    // (bukan "tujuh puluh empat").
+    const decWords = parts[1].split('').map((d) => DIGIT_KATA[parseInt(d, 10)] || 'nol').join(' ');
     hasil += ' koma ' + decWords;
   }
   return hasil + ' persen';
