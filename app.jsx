@@ -89,6 +89,30 @@ function ImagePreview({ file, targetWidth, uniform }) {
   return null;
 }
 
+// Daftar tetap "Kelompok Barang" (sesuai referensi resmi) -- dropdown,
+// supaya tidak ada risiko salah ketik.
+const KELOMPOK_BARANG_OPTIONS = [
+  'Bahan Penunjang Pertanian',
+  'Mesin dan Peralatan Pertanian',
+  'Mesin dan Peralatan Pertambangan',
+  'Mesin dan Peralatan Migas',
+  'Alat Berat, Konstruksi dan Material Handling',
+  'Mesin dan Peralatan Pabrik',
+  'Bahan Bangunan/Konstruksi',
+  'Logam dan Barang Logam',
+  'Bahan Kimia dan Barang Kimia',
+  'Peralatan Elektronika',
+  'Peralatan Kelistrikan',
+  'Peralatan Telekomunikasi',
+  'Alat Transport',
+  'Bahan dan Peralatan Kesehatan',
+  'Komputer dan Peralatan Kantor',
+  'Pakaian dan Perlengkapan Kerja',
+  'Peralatan Olahraga dan Pendidikan',
+  'Sarana Pertahanan',
+  'Barang Lainnya',
+];
+
 function App() {
   const [activeTab, setActiveTab] = useState(1) // Buka Menu 1
   const [status, setStatus] = useState('')
@@ -912,7 +936,14 @@ function App() {
               <div style={sectionStyle}>
                 <h4 style={sectionTitle}>C. Spesifikasi Barang</h4>
                 <div style={grid2Col}>
-                  <div><label style={{ fontWeight: 'bold', fontSize: '13px' }}>Kelompok Barang:</label><input type="text" value={kelompokBarang} onChange={(e) => setKelompokBarang(e.target.value)} style={inputStyle} /></div>
+                  <div><label style={{ fontWeight: 'bold', fontSize: '13px' }}>Kelompok Barang:</label>
+                    <select value={kelompokBarang} onChange={(e) => setKelompokBarang(e.target.value)} style={inputStyle}>
+                      <option value="">-- Pilih Kelompok Barang --</option>
+                      {KELOMPOK_BARANG_OPTIONS.map((opt) => (
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))}
+                    </select>
+                  </div>
                   <div><label style={{ fontWeight: 'bold', fontSize: '13px' }}>Jenis Barang:</label><input type="text" value={jenisBarang} onChange={(e) => setJenisBarang(e.target.value)} style={inputStyle} /></div>
                   <div><label style={{ fontWeight: 'bold', fontSize: '13px' }}>Merek Barang:</label><input type="text" value={merekBarang} onChange={(e) => setMerekBarang(e.target.value)} style={inputStyle} /></div>
                   <div><label style={{ fontWeight: 'bold', fontSize: '13px' }}>Tipe Barang:</label><input type="text" value={tipeBarang} onChange={(e) => setTipeBarang(e.target.value)} style={inputStyle} /></div>
