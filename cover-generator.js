@@ -153,6 +153,7 @@
       tahun,
       baseColor,
       fotoProdukBlob,
+      fotoProdukUrl,
       logoKemenperinSrc,
       logoBbsSrc,
     } = opts;
@@ -217,18 +218,29 @@
 
     // ---------------- Diamond besar: foto produk (border oranye) ----------------
     const diaCx = 175, diaCy = 640, diaR = 215, diaBorder = 17;
-    if (fotoProdukBlob) {
-      try {
-        const img = await loadImageFromBlob(fotoProdukBlob);
-        ctx.save();
-        diamondPath(ctx, diaCx, diaCy, diaR - diaBorder);
-        ctx.clip();
-        drawCoverFit(ctx, img, diaCx - diaR, diaCy - diaR, diaR * 2, diaR * 2);
-        ctx.restore();
-      } catch (e) {
-        console.warn('Cover: gagal memuat foto produk', e);
+    
+    let imgProduct = null;
+    try {
+      // Cek apakah ada file Blob (dari input type file) ATAU URL (dari Jinja)
+      if (fotoProdukBlob) {
+        imgProduct = await loadImageFromBlob(fotoProdukBlob);
+      } else if (fotoProdukUrl) {
+        imgProduct = await loadImage(fotoProdukUrl);
       }
+    } catch (e) {
+      console.warn('Cover: gagal memuat foto produk', e);
     }
+
+    // Jika gambar berhasil diload (baik dari Blob maupun URL), masukkan ke dalam diamond
+    if (imgProduct) {
+      ctx.save();
+      diamondPath(ctx, diaCx, diaCy, diaR - diaBorder);
+      ctx.clip(); // Memotong area canvas sesuai bentuk diamond
+      drawCoverFit(ctx, imgProduct, diaCx - diaR, diaCy - diaR, diaR * 2, diaR * 2);
+      ctx.restore();
+    }
+
+    // Menggambar bingkainya (warnanya tetap mengikuti settingan awal Anda)
     diamondPath(ctx, diaCx, diaCy, diaR);
     ctx.strokeStyle = ORANGE;
     ctx.lineWidth = diaBorder;
