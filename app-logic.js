@@ -240,7 +240,7 @@
       akta_kantor_industri: state.aktaKantorIndustri,
       npwp_kantor_industri: state.npwpKantorIndustri,
 
-      nilai_bmp: state.nilaiBmp,
+      nilai_bmp: state.nilaiBmp ? String(state.nilaiBmp).replace('.', ',') : "",
       terbilang_bmp: state.terbilangBmp,
 
       tgl_verifikasi_dok: DocxEngine.formatTanggalIndo(state.tglVerifikasiDok),
@@ -253,9 +253,9 @@
       kode_hs: state.kodeHs,
       merek_barang: state.merekBarang,
       kelompok_barang: state.kelompokBarang,
-      nilai_tkdn: state.nilaiTkdn,
+      nilai_tkdn: state.nilaiTkdn ? String(state.nilaiTkdn).replace('.', ',') : "",
       terbilang_tkdn: state.terbilangTkdn,
-      nilai_brainware: state.nilaiBrainware,
+      nilai_brainware: state.nilaiBrainware ? String(state.nilaiBrainware).replace('.', ',') : "",
       terbilang_brainware: state.terbilangBrainware,
       nama_verifikator: state.namaVerifikator,
       nip_verifikator: state.nipVerifikator,
