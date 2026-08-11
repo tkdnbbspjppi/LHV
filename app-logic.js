@@ -77,7 +77,7 @@
     { stateKey: "fileTtdVerifikator", contextKey: "ttd_verifikator", widthMm: 20 },
     { stateKey: "fileStruktur", contextKey: "struktur_organisasi", widthMm: 70 },
     { stateKey: "fileAlurProduksi", contextKey: "alur_produksi", widthMm: 70 },
-    { stateKey: "fileStrukturIndustri", contextKey: "struktur_industri", widthMm: 70 },
+    { stateKey: "fileStrukturIndustri", contextKey: "struktur_organisasi_perusahaan_industri", widthMm: 70 },
     // foto_barang: dipakai template TKDN di blok "Rincian Barang" (Ringkasan Eksekutif) sebagai 1 foto tunggal
     { stateKey: "fileFotoBarang", contextKey: "foto_barang", widthMm: 70 },
   ];
@@ -240,7 +240,7 @@
       akta_kantor_industri: state.aktaKantorIndustri,
       npwp_kantor_industri: state.npwpKantorIndustri,
 
-      nilai_bmp: state.nilaiBmp ? String(state.nilaiBmp).replace('.', ',') : "",
+      nilai_bmp: state.nilaiBmp,
       terbilang_bmp: state.terbilangBmp,
 
       tgl_verifikasi_dok: DocxEngine.formatTanggalIndo(state.tglVerifikasiDok),
@@ -253,9 +253,9 @@
       kode_hs: state.kodeHs,
       merek_barang: state.merekBarang,
       kelompok_barang: state.kelompokBarang,
-      nilai_tkdn: state.nilaiTkdn ? String(state.nilaiTkdn).replace('.', ',') : "",
+      nilai_tkdn: state.nilaiTkdn,
       terbilang_tkdn: state.terbilangTkdn,
-      nilai_brainware: state.nilaiBrainware ? String(state.nilaiBrainware).replace('.', ',') : "",
+      nilai_brainware: state.nilaiBrainware,
       terbilang_brainware: state.terbilangBrainware,
       nama_verifikator: state.namaVerifikator,
       nip_verifikator: state.nipVerifikator,

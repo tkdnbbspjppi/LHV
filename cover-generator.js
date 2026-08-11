@@ -269,8 +269,11 @@
     ctx.textAlign = 'left';
     ctx.fillStyle = TEXT_NAVY;
     ctx.font = 'bold 24px Arial, sans-serif';
-    ctx.fillText('NO. LHV : ' + (noLhv || '-'), rightX, ty);
-    ty += 44;
+    wrapText(ctx, 'NO. LHV : ' + (noLhv || '-'), rightW).forEach((line) => {
+      ctx.fillText(line, rightX, ty);
+      ty += 30;
+    });
+    ty += 14;
 
     ctx.font = '900 34px Arial, sans-serif';
     wrapText(ctx, (judulLaporan || '').toUpperCase(), rightW).forEach((line) => {
@@ -317,8 +320,10 @@
         ty += 28;
       });
     } else {
-      ctx.fillText('KBLI ' + (normKode || '-'), rightX, ty);
-      ty += 28;
+      wrapText(ctx, 'KBLI ' + (normKode || '-'), rightW).forEach((line) => {
+        ctx.fillText(line, rightX, ty);
+        ty += 28;
+      });
       if (normDesk) {
         wrapText(ctx, normDesk, rightW).forEach((line) => {
           ctx.fillText(line, rightX, ty);
