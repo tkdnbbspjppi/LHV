@@ -31,6 +31,18 @@ lewat `file://` karena browser memblokir `fetch()` ke file template pada mode te
 
 - **Form input** — identik dengan aplikasi React yang Bapak/Ibu buat sebelumnya (5 tab: Cover & Logo,
   Ringkasan Eksekutif, Hasil Verifikasi, Dokumen Pendukung, Lampiran).
+- **Upload PDF untuk gambar tunggal** — Struktur Organisasi, Struktur Organisasi Industri, dan Diagram
+  Alur Proses Produksi sekarang bisa diupload sebagai PDF juga (bukan cuma PNG/JPG); halaman pertama
+  PDF otomatis diambil sebagai gambar. (Bukti Kepemilikan Pabrik/Fasilitas Produksi sudah lebih dulu
+  mendukung PDF karena memakai komponen upload dokumen umum.)
+- **Rekapitulasi Bahan Baku: tabel atau upload dokumen** — sekarang ada pilihan mode: isi manual lewat
+  **Tabel Dinamis** (seperti sebelumnya), atau **Upload Dokumen (PDF/Gambar)** kalau perusahaan sudah
+  punya rekapitulasinya sendiri dalam bentuk file siap pakai.
+- **Tombol "Gunakan file yang sama"** — beberapa dokumen diminta di lebih dari satu bagian form (mis.
+  KTP di Dokumen Pendukung & di Fasilitas Produksi, Struktur Organisasi di Ringkasan Eksekutif & di
+  Fasilitas Produksi, Alur Proses Produksi & Invoice/Bukti Pembelian). Sekarang ada tombol 📋 di
+  bagian kedua yang otomatis menyalin file yang sudah diupload di bagian pertama, tanpa perlu pilih
+  file dari komputer lagi.
 - **Foto otomatis rapi (skala proporsional)** — setiap foto/dokumen yang diupload di kategori bergrid
   (KTP, sertifikat, bukti pembelian, dsb) otomatis diskalakan **proporsional (tanpa dipotong)** ke
   kotak seragam sebelum disisipkan ke Word, supaya grid 2 kolom selalu rapi & sejajar meski foto
@@ -67,6 +79,12 @@ lewat `file://` karena browser memblokir `fetch()` ke file template pada mode te
   *(Catatan desain: ini sedikit berbeda dari backend lama yang mengekstrak gambar mentah dari dalam
   PDF — pendekatan render-per-halaman ini lebih stabil dijalankan di browser dan hasilnya biasanya
   setara atau lebih rapi karena tidak bergantung pada bagaimana gambar disusun di dalam file PDF.)*
+- **Ambil file langsung dari Google Drive** (`gdrive-picker.js`) — di setiap kotak upload ada tombol
+  **📁 Drive** yang membuka jendela pemilih Google Drive, tanpa perlu unduh file ke komputer dulu.
+  **Wajib disetup dulu** oleh admin aplikasi — lihat panduan di bawah.
+- **Formulir Verifikasi: upload satu-per-satu atau 1 dokumen gabungan** — di tab "3. Hasil Verifikasi"
+  sekarang ada pilihan: isi tiap formulir satu-per-satu (seperti sebelumnya), atau upload **1 file PDF**
+  berisi semua formulir sekaligus — sistem otomatis memecahnya (1 halaman PDF = 1 formulir).
 
 ## Struktur File
 
@@ -75,9 +93,45 @@ index.html          → halaman utama, memuat semua library via CDN
 app.jsx              → form React (5 tab, sama seperti aplikasi asli)
 app-logic.js          → pemetaan field ⇄ context dokumen, ekstraksi PDF, penyimpanan proyek
 docx-engine.js         → mesin generate .docx (pengganti docxtpl)
+excel-render.js         → render file Excel jadi gambar tabel (untuk Formulir Verifikasi)
+cover-generator.js       → generator cover otomatis (Canvas API)
+gdrive-picker.js          → integrasi Google Drive Picker (perlu API Key & Client ID sendiri)
 templates/              → 3 file template Word asli (jangan diubah namanya)
 assets/                  → logo (perlu diganti dengan logo asli)
 ```
+
+## Setup Google Drive (wajib agar tombol "📁 Drive" berfungsi)
+
+Tombol Google Drive butuh **API Key** dan **OAuth Client ID** milik Bapak/Ibu sendiri (gratis dari
+Google, tapi wajib didaftarkan sendiri — aplikasi pihak ketiga seperti ini tidak boleh memakai
+kredensial orang lain). Tanpa setup ini, tombol "📁 Drive" akan menampilkan pesan error yang jelas
+(bukan aplikasi rusak) saat diklik — fitur upload biasa tetap berjalan normal.
+
+**Langkah setup (sekali saja, ±10 menit):**
+
+1. Buka [Google Cloud Console](https://console.cloud.google.com/) → buat project baru (atau pakai yang sudah ada).
+2. Menu **APIs & Services → Library** → aktifkan 2 API ini:
+   - **Google Drive API**
+   - **Google Picker API**
+3. Menu **APIs & Services → Credentials** → **Create Credentials**:
+   - **API Key** → salin nilainya.
+   - **OAuth Client ID** → pilih tipe **Web application** →
+     di bagian **Authorized JavaScript origins**, tambahkan URL GitHub Pages Bapak/Ibu,
+     contoh: `https://qualfa09.github.io` (tanpa slash di akhir, tanpa path `/LHV`) →
+     salin **Client ID**-nya (format `xxxxx.apps.googleusercontent.com`).
+4. Menu **APIs & Services → OAuth consent screen** → isi info dasar aplikasi (nama, email) →
+   status **Testing** sudah cukup untuk pemakaian internal BBSPJPPI (tambahkan email verifikator
+   yang akan pakai sebagai "Test users" di sana).
+5. Buka file **`gdrive-picker.js`**, isi 2 baris di bagian atas:
+   ```js
+   const GOOGLE_API_KEY = 'ISI_API_KEY_ANDA_DI_SINI';
+   const GOOGLE_CLIENT_ID = 'ISI_OAUTH_CLIENT_ID_ANDA_DI_SINI.apps.googleusercontent.com';
+   ```
+   ganti dengan API Key & Client ID dari langkah 3, lalu upload ulang file ini ke GitHub.
+6. Selesai — refresh halaman GitHub Pages-nya, tombol "📁 Drive" siap dipakai (klik pertama kali
+   akan minta izin login Google, sesudah itu tidak perlu login ulang selama ±1 jam).
+
+
 
 ## Keterbatasan yang perlu diketahui
 
