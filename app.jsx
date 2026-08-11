@@ -167,6 +167,38 @@ function ReuseButton({ label, onClick }) {
   );
 }
 
+function GDriveButton({ mimeTypes, onFile, compact }) {
+  const [busy, setBusy] = useState(false);
+  const handleClick = async () => {
+    setBusy(true);
+    try {
+      const file = await GDrivePicker.pickFileFromDrive(mimeTypes);
+      if (file) onFile(file);
+    } catch (e) {
+      alert(e.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <button type="button" onClick={handleClick} disabled={busy} title="Pilih file dari Google Drive" style={{
+      padding: compact ? '6px 8px' : '8px 12px',
+      fontSize: '12px', fontWeight: 'bold',
+      backgroundColor: '#e8f0fe', color: '#1a73e8',
+      border: '1px solid #aecbfa', borderRadius: '4px',
+      cursor: busy ? 'default' : 'pointer', whiteSpace: 'nowrap',
+      alignSelf: compact ? 'center' : undefined,
+      marginTop: compact ? '6px' : 0,
+    }}>
+      {busy ? '⏳' : '📁 Drive'}
+    </button>
+  );
+}
+
+const MIME_GAMBAR = ['image/png', 'image/jpeg'];
+const MIME_DOKUMEN = ['image/png', 'image/jpeg', 'application/pdf'];
+const MIME_FORMULIR = ['image/png', 'image/jpeg', 'application/pdf', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
+
 function App() {
   const [activeTab, setActiveTab] = useState(1) // Buka Menu 1
   const [status, setStatus] = useState('')
@@ -273,6 +305,8 @@ function App() {
   // STATE MENU 3: HASIL VERIFIKASI (DINAMIS)
   // ==========================================
   const [formulirVerifikasi, setFormulirVerifikasi] = useState([])
+  const [modeFormulir, setModeFormulir] = useState('perItem') // 'perItem' | 'gabungan'
+  const [fileFormulirGabungan, setFileFormulirGabungan] = useState(null)
 
   // ==========================================
   // STATE MENU 4: DOKUMEN PENDUKUNG
@@ -412,6 +446,8 @@ function App() {
     nipPejabat: setNipPejabat,
     acuanPeraturan: setAcuanPeraturan,
     formulirVerifikasi: setFormulirVerifikasi,
+    modeFormulir: setModeFormulir,
+    fileFormulirGabungan: setFileFormulirGabungan,
     teleponKantor: setTeleponKantor,
     faxKantor: setFaxKantor,
     emailKantor: setEmailKantor,
@@ -507,7 +543,9 @@ function App() {
     fileCover, fileLogo, fileTtdVerifikator, fileStruktur, fileAlurProduksi,
     fileFotoBarang, fileFotoProdukUtama,
     fileStrukturIndustri,
-    formulirVerifikasi,
+    formulirVerifikasi: modeFormulir === 'gabungan'
+      ? [{ id: 1, judul: 'Formulir Verifikasi (Dokumen Gabungan)', file: fileFormulirGabungan }]
+      : formulirVerifikasi,
     fileBuktiPabrik, fileBom, fileSertifikatTkdn, fileBuktiBeli, fileKtp,
     fileBuktiKerjasama,
     fileTenagaKerjaBmp, fileInvestasiBmp, fileKemitraanBmp, fileSubstitusiBmp,
@@ -741,6 +779,7 @@ function App() {
           <div style={{ display: 'flex', gap: '10px' }}>
             <input type="text" value={item.keterangan} onChange={(e) => updateDynamic(state, setState, item.id, 'keterangan', e.target.value)} placeholder={`Keterangan ${index + 1}`} style={inputStyle} />
             <input type="file" accept="image/png, image/jpeg, application/pdf" onChange={(e) => updateDynamic(state, setState, item.id, 'file', e.target.files[0])} style={{ alignSelf: 'center', marginTop: '6px' }} />
+            <GDriveButton compact mimeTypes={MIME_DOKUMEN} onFile={(f) => updateDynamic(state, setState, item.id, 'file', f)} />
             <button type="button" onClick={() => removeDynamic(state, setState, item.id)} style={{ padding: '8px', marginTop: '6px', backgroundColor: '#ffebee', color: '#c62828', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>X</button>
           </div>
           {/* Pratinjau Dokumen Umum dikunci pada 7 cm, otomatis diskalakan proporsional ke kotak seragam */}
@@ -829,7 +868,10 @@ function App() {
 
               {coverMode === 'upload' ? (
                 <>
-                  <input type="file" accept="image/png, image/jpeg" onChange={(e) => setFileCover(e.target.files[0])} style={{ width: '100%', marginTop: '10px' }}/>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '10px' }}>
+                    <input type="file" accept="image/png, image/jpeg" onChange={(e) => setFileCover(e.target.files[0])} style={{ flex: 1 }}/>
+                    <GDriveButton mimeTypes={MIME_GAMBAR} onFile={setFileCover} />
+                  </div>
                   <ImagePreview file={fileCover} targetWidth="Bebas (Original)" />
                 </>
               ) : (
@@ -844,7 +886,10 @@ function App() {
                     </div>
                     <div>
                       <label style={{ fontWeight: 'bold', fontSize: '13px' }}>Foto Produk untuk Cover:</label><br/>
-                      <input type="file" accept="image/png, image/jpeg" onChange={(e) => setFileFotoCover(e.target.files[0])} style={{ width: '100%', marginTop: '6px' }}/>
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '6px' }}>
+                        <input type="file" accept="image/png, image/jpeg" onChange={(e) => setFileFotoCover(e.target.files[0])} style={{ flex: 1 }}/>
+                        <GDriveButton mimeTypes={MIME_GAMBAR} onFile={setFileFotoCover} />
+                      </div>
                     </div>
                   </div>
                   <div style={{ marginTop: '12px' }}>
@@ -872,7 +917,10 @@ function App() {
             </div>
             <div style={{ padding: '20px', backgroundColor: '#fff3e0', borderRadius: '6px' }}>
               <label style={{ fontWeight: 'bold' }}>Unggah Logo Perusahaan (Klien):</label><br/>
-              <input type="file" accept="image/png, image/jpeg" onChange={(e) => setFileLogo(e.target.files[0])} style={{ width: '100%', marginTop: '10px' }}/>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '10px' }}>
+              <input type="file" accept="image/png, image/jpeg" onChange={(e) => setFileLogo(e.target.files[0])} style={{ flex: 1 }}/>
+              <GDriveButton mimeTypes={MIME_GAMBAR} onFile={setFileLogo} />
+            </div>
               <ImagePreview file={fileLogo} targetWidth="2 cm" />
             </div>
           </div>
@@ -1032,13 +1080,19 @@ function App() {
                     </label><br/>
                     {jenisLhv === 'Kerjasama' ? (
                       <>
-                        <input type="file" accept="image/png, image/jpeg" onChange={(e) => setFileFotoProdukUtama(e.target.files[0])} style={{ width: '100%', marginTop: '10px' }}/>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '10px' }}>
+                          <input type="file" accept="image/png, image/jpeg" onChange={(e) => setFileFotoProdukUtama(e.target.files[0])} style={{ flex: 1 }}/>
+                          <GDriveButton mimeTypes={MIME_GAMBAR} onFile={setFileFotoProdukUtama} />
+                        </div>
                         <ImagePreview file={fileFotoProdukUtama} targetWidth="7 cm" />
                         <p style={{ fontSize: '12px', color: '#777', marginTop: '5px' }}>Catatan: kalau tidak diisi, foto pertama dari galeri "Foto Produk" di tab Dokumen Pendukung akan dipakai sebagai gantinya.</p>
                       </>
                     ) : (
                       <>
-                        <input type="file" accept="image/png, image/jpeg" onChange={(e) => setFileFotoBarang(e.target.files[0])} style={{ width: '100%', marginTop: '10px' }}/>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '10px' }}>
+                          <input type="file" accept="image/png, image/jpeg" onChange={(e) => setFileFotoBarang(e.target.files[0])} style={{ flex: 1 }}/>
+                          <GDriveButton mimeTypes={MIME_GAMBAR} onFile={setFileFotoBarang} />
+                        </div>
                         <ImagePreview file={fileFotoBarang} targetWidth="7 cm" />
                       </>
                     )}
@@ -1074,7 +1128,10 @@ function App() {
                 <div><label style={{ fontWeight: 'bold', fontSize: '13px' }}>NIP Verifikator:</label><input type="text" value={nipVerifikator} onChange={(e) => setNipVerifikator(e.target.value)} style={inputStyle} /></div>
                 <div style={{ gridColumn: '1 / -1', padding: '10px', backgroundColor: '#fff', borderRadius: '4px', border: '1px dashed #ccc' }}>
                   <label style={{ fontWeight: 'bold', fontSize: '13px' }}>Scan Tanda Tangan Verifikator (PNG):</label>
-                  <input type="file" accept="image/png" onChange={(e) => setFileTtdVerifikator(e.target.files[0])} style={{ width: '100%', marginTop: '5px' }} />
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '5px' }}>
+                    <input type="file" accept="image/png" onChange={(e) => setFileTtdVerifikator(e.target.files[0])} style={{ flex: 1 }} />
+                    <GDriveButton mimeTypes={['image/png']} onFile={setFileTtdVerifikator} />
+                  </div>
                   <ImagePreview file={fileTtdVerifikator} targetWidth="2 cm" />
                 </div>
                 <div>
@@ -1098,29 +1155,57 @@ function App() {
         {activeTab === 3 && ( 
           <div>
             <h3 style={{ color: '#333', marginTop: 0, marginBottom: '5px' }}>Rincian Hasil Verifikasi</h3>
-            <p style={{ color: '#666', fontSize: '14px', marginBottom: '20px' }}>
-              Sistem otomatis menyediakan <strong>{formulirVerifikasi.length} baris</strong> sesuai dasar hukum yang Anda pilih di Menu 2.
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              {formulirVerifikasi.map((form) => (
-                <div key={form.id} style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '15px', border: '1px solid #e0e0e0', borderRadius: '6px', backgroundColor: '#fafafa' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                    <div style={{ flex: '1' }}>
-                      <label style={{ fontWeight: 'bold', fontSize: '12px' }}>Judul Formulir:</label>
-                      <input type="text" value={form.judul} onChange={(e) => setFormulirVerifikasi(formulirVerifikasi.map(f => f.id === form.id ? { ...f, judul: e.target.value } : f))} style={inputStyle} />
-                    </div>
-                    <div style={{ flex: '2' }}>
-                      <label style={{ fontWeight: 'bold', fontSize: '12px' }}>Unggah Screenshot Hasil Excel (PNG/JPG):</label>
-                      <input type="file" accept="image/png, image/jpeg, application/pdf, .xlsx, .xls" onChange={(e) => setFormulirVerifikasi(formulirVerifikasi.map(f => f.id === form.id ? { ...f, file: e.target.files[0] } : f))} style={{ width: '100%', marginTop: '8px' }} />
-                      <span style={{ fontSize: '11px', color: '#888', display: 'block', marginTop: '4px' }}>Bisa gambar (PNG/JPG), PDF (per halaman otomatis jadi gambar), atau Excel (.xlsx/.xls, otomatis digambar sebagai tabel)</span>
-                    </div>
-                    <button type="button" onClick={() => setFormulirVerifikasi(formulirVerifikasi.filter(f => f.id !== form.id))} style={{ padding: '8px 12px', backgroundColor: '#ffebee', color: '#c62828', border: 'none', borderRadius: '4px', cursor: 'pointer', marginTop:'20px' }}>X</button>
-                  </div>
-                  <ImagePreview file={form.file} targetWidth="7 cm" />
-                </div>
-              ))}
+
+            <div style={{ display: 'flex', gap: '15px', margin: '0 0 15px 0' }}>
+              <label style={{ fontWeight: 'normal', cursor: 'pointer', fontSize: '13px' }}>
+                <input type="radio" checked={modeFormulir === 'perItem'} onChange={() => setModeFormulir('perItem')} /> 📑 Upload Satu per Satu
+              </label>
+              <label style={{ fontWeight: 'normal', cursor: 'pointer', fontSize: '13px' }}>
+                <input type="radio" checked={modeFormulir === 'gabungan'} onChange={() => setModeFormulir('gabungan')} /> 📚 Upload 1 Dokumen Gabungan (Otomatis Dipecah)
+              </label>
             </div>
-            <button type="button" onClick={() => setFormulirVerifikasi([...formulirVerifikasi, { id: Date.now(), judul: 'Formulir Tambahan', file: null }])} style={{ marginTop: '20px', padding: '10px 15px', backgroundColor: '#e3f2fd', color: '#1565c0', border: '1px dashed #1e88e5', borderRadius: '4px', cursor: 'pointer', width: '100%', fontWeight:'bold' }}>+ Tambah Formulir Baru</button>
+
+            {modeFormulir === 'gabungan' ? (
+              <div style={{ padding: '15px', border: '1px solid #e0e0e0', borderRadius: '6px', backgroundColor: '#fafafa' }}>
+                <p style={{ color: '#666', fontSize: '13px', marginTop: 0 }}>
+                  Upload 1 file PDF yang berisi SEMUA formulir sekaligus (mis. hasil export dari Excel/aplikasi penghitungan TKDN) — sistem akan otomatis memecahnya jadi beberapa formulir, <strong>1 halaman PDF = 1 formulir</strong>, sesuai urutan halaman.
+                </p>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <input type="file" accept="application/pdf,image/png,image/jpeg" onChange={(e) => setFileFormulirGabungan(e.target.files[0])} style={{ flex: 1 }} />
+                  <GDriveButton mimeTypes={MIME_DOKUMEN} onFile={setFileFormulirGabungan} />
+                </div>
+                <ImagePreview file={fileFormulirGabungan} targetWidth="Bebas (per halaman)" />
+              </div>
+            ) : (
+              <>
+                <p style={{ color: '#666', fontSize: '14px', marginBottom: '20px' }}>
+                  Sistem otomatis menyediakan <strong>{formulirVerifikasi.length} baris</strong> sesuai dasar hukum yang Anda pilih di Menu 2.
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                  {formulirVerifikasi.map((form) => (
+                    <div key={form.id} style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '15px', border: '1px solid #e0e0e0', borderRadius: '6px', backgroundColor: '#fafafa' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                        <div style={{ flex: '1' }}>
+                          <label style={{ fontWeight: 'bold', fontSize: '12px' }}>Judul Formulir:</label>
+                          <input type="text" value={form.judul} onChange={(e) => setFormulirVerifikasi(formulirVerifikasi.map(f => f.id === form.id ? { ...f, judul: e.target.value } : f))} style={inputStyle} />
+                        </div>
+                        <div style={{ flex: '2' }}>
+                          <label style={{ fontWeight: 'bold', fontSize: '12px' }}>Unggah Screenshot Hasil Excel (PNG/JPG):</label>
+                          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '8px' }}>
+                            <input type="file" accept="image/png, image/jpeg, application/pdf, .xlsx, .xls" onChange={(e) => setFormulirVerifikasi(formulirVerifikasi.map(f => f.id === form.id ? { ...f, file: e.target.files[0] } : f))} style={{ flex: 1 }} />
+                            <GDriveButton mimeTypes={MIME_FORMULIR} onFile={(fl) => setFormulirVerifikasi(formulirVerifikasi.map(f => f.id === form.id ? { ...f, file: fl } : f))} />
+                          </div>
+                          <span style={{ fontSize: '11px', color: '#888', display: 'block', marginTop: '4px' }}>Bisa gambar (PNG/JPG), PDF (per halaman otomatis jadi gambar), atau Excel (.xlsx/.xls, otomatis digambar sebagai tabel)</span>
+                        </div>
+                        <button type="button" onClick={() => setFormulirVerifikasi(formulirVerifikasi.filter(f => f.id !== form.id))} style={{ padding: '8px 12px', backgroundColor: '#ffebee', color: '#c62828', border: 'none', borderRadius: '4px', cursor: 'pointer', marginTop:'20px' }}>X</button>
+                      </div>
+                      <ImagePreview file={form.file} targetWidth="7 cm" />
+                    </div>
+                  ))}
+                </div>
+                <button type="button" onClick={() => setFormulirVerifikasi([...formulirVerifikasi, { id: Date.now(), judul: 'Formulir Tambahan', file: null }])} style={{ marginTop: '20px', padding: '10px 15px', backgroundColor: '#e3f2fd', color: '#1565c0', border: '1px dashed #1e88e5', borderRadius: '4px', cursor: 'pointer', width: '100%', fontWeight:'bold' }}>+ Tambah Formulir Baru</button>
+              </>
+            )}
           </div> 
         )}
 
@@ -1170,7 +1255,10 @@ function App() {
                     <div><label style={{ fontWeight: 'bold', fontSize: '13px' }}>IUI / NIB:</label><input type="text" value={noIzin} readOnly style={readOnlyStyle} /></div>
                     <div style={{ gridColumn: '1 / -1', padding: '10px', backgroundColor: '#e3f2fd', borderRadius: '4px', marginTop:'10px' }}>
                       <label style={{ fontWeight: 'bold', fontSize: '13px' }}>Struktur Organisasi Pelaku Usaha (Gambar):</label>
-                      <input type="file" accept="image/png, image/jpeg, application/pdf" onChange={(e) => setFileStruktur(e.target.files[0])} style={{ width: '100%', marginTop: '5px' }} />
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '5px' }}>
+                        <input type="file" accept="image/png, image/jpeg, application/pdf" onChange={(e) => setFileStruktur(e.target.files[0])} style={{ flex: 1 }} />
+                        <GDriveButton mimeTypes={MIME_DOKUMEN} onFile={setFileStruktur} />
+                      </div>
                       <ImagePreview file={fileStruktur} targetWidth="7 cm" />
                     </div>
                   </div>
@@ -1204,12 +1292,18 @@ function App() {
                   <div style={grid2Col}>
                     <div style={{ padding: '10px', backgroundColor: '#ffe0b2', borderRadius: '4px', marginTop:'15px' }}>
                       <label style={{ fontWeight: 'bold', fontSize: '13px', color: '#e65100' }}>Struktur Organisasi Perusahaan Industri (Gambar):</label>
-                      <input type="file" accept="image/png, image/jpeg, application/pdf" onChange={(e) => setFileStrukturIndustri(e.target.files[0])} style={{ width: '100%', marginTop: '5px' }} />
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '5px' }}>
+                        <input type="file" accept="image/png, image/jpeg, application/pdf" onChange={(e) => setFileStrukturIndustri(e.target.files[0])} style={{ flex: 1 }} />
+                        <GDriveButton mimeTypes={MIME_DOKUMEN} onFile={setFileStrukturIndustri} />
+                      </div>
                       <ImagePreview file={fileStrukturIndustri} targetWidth="7 cm" />
                     </div>
                     <div style={{ padding: '10px', backgroundColor: '#fff3e0', borderRadius: '4px', marginTop:'15px' }}>
                       <label style={{ fontWeight: 'bold', fontSize: '13px' }}>Diagram Alur Proses Produksi (Gambar):</label>
-                      <input type="file" accept="image/png, image/jpeg, application/pdf" onChange={(e) => setFileAlurProduksi(e.target.files[0])} style={{ width: '100%', marginTop: '5px' }} />
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '5px' }}>
+                        <input type="file" accept="image/png, image/jpeg, application/pdf" onChange={(e) => setFileAlurProduksi(e.target.files[0])} style={{ flex: 1 }} />
+                        <GDriveButton mimeTypes={MIME_DOKUMEN} onFile={setFileAlurProduksi} />
+                      </div>
                       <ImagePreview file={fileAlurProduksi} targetWidth="7 cm" />
                     </div>
                   </div>
@@ -1272,12 +1366,18 @@ function App() {
                   <div style={grid2Col}>
                     <div style={{ padding: '10px', backgroundColor: '#e3f2fd', borderRadius: '4px' }}>
                       <label style={{ fontWeight: 'bold', fontSize: '13px' }}>2. Struktur Organisasi Perusahaan (Gambar):</label>
-                      <input type="file" accept="image/png, image/jpeg, application/pdf" onChange={(e) => setFileStruktur(e.target.files[0])} style={{ width: '100%', marginTop: '5px' }} />
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '5px' }}>
+                        <input type="file" accept="image/png, image/jpeg, application/pdf" onChange={(e) => setFileStruktur(e.target.files[0])} style={{ flex: 1 }} />
+                        <GDriveButton mimeTypes={MIME_DOKUMEN} onFile={setFileStruktur} />
+                      </div>
                       <ImagePreview file={fileStruktur} targetWidth="7 cm" />
                     </div>
                     <div style={{ padding: '10px', backgroundColor: '#fff3e0', borderRadius: '4px' }}>
                       <label style={{ fontWeight: 'bold', fontSize: '13px' }}>3. Diagram Alur Proses Produksi (Gambar):</label>
-                      <input type="file" accept="image/png, image/jpeg, application/pdf" onChange={(e) => setFileAlurProduksi(e.target.files[0])} style={{ width: '100%', marginTop: '5px' }} />
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '5px' }}>
+                        <input type="file" accept="image/png, image/jpeg, application/pdf" onChange={(e) => setFileAlurProduksi(e.target.files[0])} style={{ flex: 1 }} />
+                        <GDriveButton mimeTypes={MIME_DOKUMEN} onFile={setFileAlurProduksi} />
+                      </div>
                       <ImagePreview file={fileAlurProduksi} targetWidth="7 cm" />
                     </div>
                   </div>
@@ -1364,7 +1464,10 @@ function App() {
                 ) : (
                   <div>
                     <p style={{ fontSize: '12px', color: '#555', marginBottom: '10px' }}>Upload dokumen rekapitulasi bahan baku yang sudah tersedia dari perusahaan (PDF akan otomatis dipecah per halaman kalau lebih dari 1 halaman).</p>
-                    <input type="file" accept="image/png, image/jpeg, application/pdf" onChange={(e) => setFileRekapBahanBaku(e.target.files[0])} style={{ width: '100%' }} />
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <input type="file" accept="image/png, image/jpeg, application/pdf" onChange={(e) => setFileRekapBahanBaku(e.target.files[0])} style={{ flex: 1 }} />
+                      <GDriveButton mimeTypes={MIME_DOKUMEN} onFile={setFileRekapBahanBaku} />
+                    </div>
                     <ImagePreview file={fileRekapBahanBaku} targetWidth="Lebar penuh tabel" />
                   </div>
                 )}
