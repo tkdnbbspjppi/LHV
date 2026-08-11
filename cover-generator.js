@@ -269,7 +269,7 @@
     ctx.textAlign = 'left';
     ctx.fillStyle = TEXT_NAVY;
     ctx.font = 'bold 24px Arial, sans-serif';
-    ctx.fillText('NO. LHV : ' + (noLhv || '-'), rightX, ty);
+    ctx.fillText('NO. LHV: ' + (noLhv || '-'), rightX, ty);
     ty += 44;
 
     ctx.font = '900 34px Arial, sans-serif';
