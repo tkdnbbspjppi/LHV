@@ -695,6 +695,12 @@ function App() {
       ? 'LAPORAN HASIL VERIFIKASI NILAI BMP'
       : 'LAPORAN HASIL VERIFIKASI NILAI TKDN BARANG';
     const tahun = (tanggalLhv && tanggalLhv.slice(0, 4)) || new Date().getFullYear();
+    
+    // Cek apakah ada foto produk yang diupload di tab Lampiran
+    const fotoLampiran = (fileFotoProduk && fileFotoProduk.length > 0 && fileFotoProduk[0].file) 
+      ? fileFotoProduk[0].file 
+      : null;
+
     return {
       judulLaporan,
       namaLembaga: namaLembagaCover,
@@ -704,8 +710,14 @@ function App() {
       kbliDeskripsi,
       jenisBarang,
       tahun,
-      baseColor: coverColor,
-      fotoProdukBlob: fileFotoCover,
+      baseColor: coverColor, // <--- Ini akan mengatur warna bingkai secara dinamis sesuai pilihan
+
+      // --- UPDATE DI BARIS INI ---
+      // Logika: Jika user upload "Foto Cover", pakai itu. 
+      // Jika kosong, otomatis ambil "Foto Produk Utama" atau "Foto Barang" atau "Foto Lampiran".
+      fotoProdukBlob: fileFotoCover || fileFotoProdukUtama || fileFotoBarang || fotoLampiran,
+      // ---------------------------
+
       logoKemenperinSrc: logoKemenperin,
       logoBbsSrc: logoBBS,
     };
