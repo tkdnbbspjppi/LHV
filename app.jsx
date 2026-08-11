@@ -155,6 +155,18 @@ function nilaiKeTerbilangPersen(nilaiInput) {
   return hasil + ' persen';
 }
 
+function ReuseButton({ label, onClick }) {
+  return (
+    <button type="button" onClick={onClick} style={{
+      display: 'block', margin: '-8px 0 15px 0', padding: '8px 12px',
+      backgroundColor: '#e8f5e9', color: '#2e7d32', border: '1px dashed #66bb6a',
+      borderRadius: '4px', cursor: 'pointer', width: '100%', fontSize: '12px', fontWeight: 'bold'
+    }}>
+      📋 {label}
+    </button>
+  );
+}
+
 function App() {
   const [activeTab, setActiveTab] = useState(1) // Buka Menu 1
   const [status, setStatus] = useState('')
@@ -341,6 +353,8 @@ function App() {
   
   const [fileGeotagging, setFileGeotagging] = useState([{ id: 120, file: null, keterangan: 'Dokumen Kunjungan (Geotagging)' }])
   const [rekapBahanBaku, setRekapBahanBaku] = useState([{ id: 1, nama_bahan: '', produsen: '', asal: 'DN' }])
+  const [modeRekapBahanBaku, setModeRekapBahanBaku] = useState('tabel') // 'tabel' | 'upload'
+  const [fileRekapBahanBaku, setFileRekapBahanBaku] = useState(null)
 
   // ==========================================
   // ==========================================
@@ -468,6 +482,8 @@ function App() {
     fileAktaSewa: setFileAktaSewa,
     fileGeotagging: setFileGeotagging,
     rekapBahanBaku: setRekapBahanBaku,
+    modeRekapBahanBaku: setModeRekapBahanBaku,
+    fileRekapBahanBaku: setFileRekapBahanBaku,
   };
 
   const buildFullState = () => ({
@@ -487,7 +503,7 @@ function App() {
     statusKantor, picKantor, aktaKantor, npwpKantor,
     alamatPabrik, teleponPabrik, faxPabrik, emailPabrik, websitePabrik,
     statusPabrik, picPabrik, aktaPabrik, npwpPabrik,
-    rekapBahanBaku, acuanPeraturan, samaDenganKantor,
+    rekapBahanBaku, modeRekapBahanBaku, fileRekapBahanBaku, acuanPeraturan, samaDenganKantor,
     fileCover, fileLogo, fileTtdVerifikator, fileStruktur, fileAlurProduksi,
     fileFotoBarang, fileFotoProdukUtama,
     fileStrukturIndustri,
@@ -599,6 +615,22 @@ function App() {
   const addRekap = () => setRekapBahanBaku([...rekapBahanBaku, { id: Date.now(), nama_bahan: '', produsen: '', asal: 'DN' }]);
   const removeRekap = (id) => setRekapBahanBaku(rekapBahanBaku.filter(item => item.id !== id));
   const updateRekap = (id, field, val) => setRekapBahanBaku(rekapBahanBaku.map(item => item.id === id ? { ...item, [field]: val } : item));
+
+  // ==========================================
+  // SALIN FILE DARI FIELD LAIN (tidak perlu upload ulang dokumen yang sama)
+  // ==========================================
+  const salinFileTunggal = (sourceFile, setTargetList, sourceLabel) => {
+    if (!sourceFile) { alert(`Belum ada file "${sourceLabel}" yang diupload sebelumnya untuk disalin.`); return; }
+    setTargetList((prev) => [{ id: Date.now(), file: sourceFile, keterangan: prev[0]?.keterangan || sourceLabel }, ...prev.filter((it) => it.file)]);
+  };
+  const salinDariDaftar = (sourceList, setTargetList, sourceLabel) => {
+    const filled = (sourceList || []).filter((it) => it.file);
+    if (filled.length === 0) { alert(`Belum ada file "${sourceLabel}" yang diupload sebelumnya untuk disalin.`); return; }
+    setTargetList((prev) => [
+      ...filled.map((it, i) => ({ id: Date.now() + i, file: it.file, keterangan: it.keterangan || prev[0]?.keterangan || sourceLabel })),
+      ...prev.filter((it) => it.file),
+    ]);
+  };
 
   const addAcuan = () => setAcuanPeraturan([...acuanPeraturan, { id: Date.now(), type: 'dynamic', aturan: '' }]);
   const removeAcuan = (id) => setAcuanPeraturan(acuanPeraturan.filter(item => item.id !== id));
@@ -1138,7 +1170,7 @@ function App() {
                     <div><label style={{ fontWeight: 'bold', fontSize: '13px' }}>IUI / NIB:</label><input type="text" value={noIzin} readOnly style={readOnlyStyle} /></div>
                     <div style={{ gridColumn: '1 / -1', padding: '10px', backgroundColor: '#e3f2fd', borderRadius: '4px', marginTop:'10px' }}>
                       <label style={{ fontWeight: 'bold', fontSize: '13px' }}>Struktur Organisasi Pelaku Usaha (Gambar):</label>
-                      <input type="file" accept="image/png, image/jpeg" onChange={(e) => setFileStruktur(e.target.files[0])} style={{ width: '100%', marginTop: '5px' }} />
+                      <input type="file" accept="image/png, image/jpeg, application/pdf" onChange={(e) => setFileStruktur(e.target.files[0])} style={{ width: '100%', marginTop: '5px' }} />
                       <ImagePreview file={fileStruktur} targetWidth="7 cm" />
                     </div>
                   </div>
@@ -1172,12 +1204,12 @@ function App() {
                   <div style={grid2Col}>
                     <div style={{ padding: '10px', backgroundColor: '#ffe0b2', borderRadius: '4px', marginTop:'15px' }}>
                       <label style={{ fontWeight: 'bold', fontSize: '13px', color: '#e65100' }}>Struktur Organisasi Perusahaan Industri (Gambar):</label>
-                      <input type="file" accept="image/png, image/jpeg" onChange={(e) => setFileStrukturIndustri(e.target.files[0])} style={{ width: '100%', marginTop: '5px' }} />
+                      <input type="file" accept="image/png, image/jpeg, application/pdf" onChange={(e) => setFileStrukturIndustri(e.target.files[0])} style={{ width: '100%', marginTop: '5px' }} />
                       <ImagePreview file={fileStrukturIndustri} targetWidth="7 cm" />
                     </div>
                     <div style={{ padding: '10px', backgroundColor: '#fff3e0', borderRadius: '4px', marginTop:'15px' }}>
                       <label style={{ fontWeight: 'bold', fontSize: '13px' }}>Diagram Alur Proses Produksi (Gambar):</label>
-                      <input type="file" accept="image/png, image/jpeg" onChange={(e) => setFileAlurProduksi(e.target.files[0])} style={{ width: '100%', marginTop: '5px' }} />
+                      <input type="file" accept="image/png, image/jpeg, application/pdf" onChange={(e) => setFileAlurProduksi(e.target.files[0])} style={{ width: '100%', marginTop: '5px' }} />
                       <ImagePreview file={fileAlurProduksi} targetWidth="7 cm" />
                     </div>
                   </div>
@@ -1240,12 +1272,12 @@ function App() {
                   <div style={grid2Col}>
                     <div style={{ padding: '10px', backgroundColor: '#e3f2fd', borderRadius: '4px' }}>
                       <label style={{ fontWeight: 'bold', fontSize: '13px' }}>2. Struktur Organisasi Perusahaan (Gambar):</label>
-                      <input type="file" accept="image/png, image/jpeg" onChange={(e) => setFileStruktur(e.target.files[0])} style={{ width: '100%', marginTop: '5px' }} />
+                      <input type="file" accept="image/png, image/jpeg, application/pdf" onChange={(e) => setFileStruktur(e.target.files[0])} style={{ width: '100%', marginTop: '5px' }} />
                       <ImagePreview file={fileStruktur} targetWidth="7 cm" />
                     </div>
                     <div style={{ padding: '10px', backgroundColor: '#fff3e0', borderRadius: '4px' }}>
                       <label style={{ fontWeight: 'bold', fontSize: '13px' }}>3. Diagram Alur Proses Produksi (Gambar):</label>
-                      <input type="file" accept="image/png, image/jpeg" onChange={(e) => setFileAlurProduksi(e.target.files[0])} style={{ width: '100%', marginTop: '5px' }} />
+                      <input type="file" accept="image/png, image/jpeg, application/pdf" onChange={(e) => setFileAlurProduksi(e.target.files[0])} style={{ width: '100%', marginTop: '5px' }} />
                       <ImagePreview file={fileAlurProduksi} targetWidth="7 cm" />
                     </div>
                   </div>
@@ -1288,40 +1320,70 @@ function App() {
             
             {jenisLhv !== 'BMP' && (
               <div style={{ marginBottom: '15px', padding: '15px', border: '1px solid #ddd', borderRadius: '6px', backgroundColor: '#fff' }}>
-                <h4 style={{ margin: '0 0 10px 0', color: '#1976d2' }}>b. Rekapitulasi Bahan Baku (Tabel Dinamis)</h4>
-                <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '10px' }}>
-                  <thead>
-                    <tr style={{ backgroundColor: '#f5f5f5', textAlign: 'left' }}>
-                      <th style={{ padding: '8px', border: '1px solid #ccc', width:'40px', textAlign:'center' }}>No</th>
-                      <th style={{ padding: '8px', border: '1px solid #ccc' }}>Bahan Baku</th>
-                      <th style={{ padding: '8px', border: '1px solid #ccc' }}>Produsen/Pemasok</th>
-                      <th style={{ padding: '8px', border: '1px solid #ccc', width:'90px' }}>Asal</th>
-                      <th style={{ padding: '8px', border: '1px solid #ccc', width:'60px', textAlign:'center' }}>Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rekapBahanBaku.map((item, index) => (
-                      <tr key={item.id}>
-                        <td style={{ padding: '8px', border: '1px solid #ccc', textAlign: 'center' }}>{index + 1}</td>
-                        <td style={{ padding: '8px', border: '1px solid #ccc' }}><input type="text" value={item.nama_bahan} onChange={(e) => updateRekap(item.id, 'nama_bahan', e.target.value)} style={{ width: '100%', padding: '5px', boxSizing:'border-box' }} /></td>
-                        <td style={{ padding: '8px', border: '1px solid #ccc' }}><input type="text" value={item.produsen} onChange={(e) => updateRekap(item.id, 'produsen', e.target.value)} style={{ width: '100%', padding: '5px', boxSizing:'border-box' }} /></td>
-                        <td style={{ padding: '8px', border: '1px solid #ccc' }}>
-                          <select value={item.asal} onChange={(e) => updateRekap(item.id, 'asal', e.target.value)} style={{ padding: '5px', width:'100%' }}>
-                            <option value="DN">DN</option><option value="LN">LN</option>
-                          </select>
-                        </td>
-                        <td style={{ padding: '8px', border: '1px solid #ccc', textAlign: 'center' }}><button type="button" onClick={() => removeRekap(item.id)} style={{ color: '#c62828', backgroundColor:'transparent', border:'none', cursor: 'pointer', fontWeight:'bold' }}>X</button></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                <button type="button" onClick={addRekap} style={{ padding: '8px 15px', backgroundColor: '#e3f2fd', color: '#1565c0', border: '1px dashed #1e88e5', borderRadius: '4px', cursor: 'pointer', width: '100%', fontWeight:'bold' }}>+ Tambah Baris Bahan Baku</button>
+                <h4 style={{ margin: '0 0 10px 0', color: '#1976d2' }}>b. Rekapitulasi Bahan Baku</h4>
+
+                <div style={{ display: 'flex', gap: '15px', margin: '0 0 15px 0' }}>
+                  <label style={{ fontWeight: 'normal', cursor: 'pointer', fontSize: '13px' }}>
+                    <input type="radio" checked={modeRekapBahanBaku === 'tabel'} onChange={() => setModeRekapBahanBaku('tabel')} /> 📝 Input Tabel Dinamis
+                  </label>
+                  <label style={{ fontWeight: 'normal', cursor: 'pointer', fontSize: '13px' }}>
+                    <input type="radio" checked={modeRekapBahanBaku === 'upload'} onChange={() => setModeRekapBahanBaku('upload')} /> 📤 Upload Dokumen (PDF/Gambar)
+                  </label>
+                </div>
+
+                {modeRekapBahanBaku === 'tabel' ? (
+                  <>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '10px' }}>
+                      <thead>
+                        <tr style={{ backgroundColor: '#f5f5f5', textAlign: 'left' }}>
+                          <th style={{ padding: '8px', border: '1px solid #ccc', width:'40px', textAlign:'center' }}>No</th>
+                          <th style={{ padding: '8px', border: '1px solid #ccc' }}>Bahan Baku</th>
+                          <th style={{ padding: '8px', border: '1px solid #ccc' }}>Produsen/Pemasok</th>
+                          <th style={{ padding: '8px', border: '1px solid #ccc', width:'90px' }}>Asal</th>
+                          <th style={{ padding: '8px', border: '1px solid #ccc', width:'60px', textAlign:'center' }}>Aksi</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {rekapBahanBaku.map((item, index) => (
+                          <tr key={item.id}>
+                            <td style={{ padding: '8px', border: '1px solid #ccc', textAlign: 'center' }}>{index + 1}</td>
+                            <td style={{ padding: '8px', border: '1px solid #ccc' }}><input type="text" value={item.nama_bahan} onChange={(e) => updateRekap(item.id, 'nama_bahan', e.target.value)} style={{ width: '100%', padding: '5px', boxSizing:'border-box' }} /></td>
+                            <td style={{ padding: '8px', border: '1px solid #ccc' }}><input type="text" value={item.produsen} onChange={(e) => updateRekap(item.id, 'produsen', e.target.value)} style={{ width: '100%', padding: '5px', boxSizing:'border-box' }} /></td>
+                            <td style={{ padding: '8px', border: '1px solid #ccc' }}>
+                              <select value={item.asal} onChange={(e) => updateRekap(item.id, 'asal', e.target.value)} style={{ padding: '5px', width:'100%' }}>
+                                <option value="DN">DN</option><option value="LN">LN</option>
+                              </select>
+                            </td>
+                            <td style={{ padding: '8px', border: '1px solid #ccc', textAlign: 'center' }}><button type="button" onClick={() => removeRekap(item.id)} style={{ color: '#c62828', backgroundColor:'transparent', border:'none', cursor: 'pointer', fontWeight:'bold' }}>X</button></td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    <button type="button" onClick={addRekap} style={{ padding: '8px 15px', backgroundColor: '#e3f2fd', color: '#1565c0', border: '1px dashed #1e88e5', borderRadius: '4px', cursor: 'pointer', width: '100%', fontWeight:'bold' }}>+ Tambah Baris Bahan Baku</button>
+                  </>
+                ) : (
+                  <div>
+                    <p style={{ fontSize: '12px', color: '#555', marginBottom: '10px' }}>Upload dokumen rekapitulasi bahan baku yang sudah tersedia dari perusahaan (PDF akan otomatis dipecah per halaman kalau lebih dari 1 halaman).</p>
+                    <input type="file" accept="image/png, image/jpeg, application/pdf" onChange={(e) => setFileRekapBahanBaku(e.target.files[0])} style={{ width: '100%' }} />
+                    <ImagePreview file={fileRekapBahanBaku} targetWidth="Lebar penuh tabel" />
+                  </div>
+                )}
               </div>
             )}
 
             {jenisLhv !== 'BMP' && renderDynamicBlock("c. Foto Bahan Baku", fileFotoBahanBaku, setFileFotoBahanBaku)}
-            {jenisLhv !== 'BMP' && renderDynamicBlock("d. Invoice Pembelian Bahan Baku", fileInvoiceBahanBaku, setFileInvoiceBahanBaku)}
-            {jenisLhv !== 'BMP' && renderDynamicBlock("e. Alur Proses Produksi Pabrik", fileAlurProsesLampiran, setFileAlurProsesLampiran)}
+            {jenisLhv !== 'BMP' && (
+              <>
+                <ReuseButton label='Gunakan file yang sama dari "Bukti Pembelian Komponen Utama" (kalau dokumennya sama)' onClick={() => salinDariDaftar(fileBuktiBeli, setFileInvoiceBahanBaku, 'Invoice Pembelian Bahan Baku')} />
+                {renderDynamicBlock("d. Invoice Pembelian Bahan Baku", fileInvoiceBahanBaku, setFileInvoiceBahanBaku)}
+              </>
+            )}
+            {jenisLhv !== 'BMP' && (
+              <>
+                <ReuseButton label='Gunakan file yang sama dari "Diagram Alur Proses Produksi" (Ringkasan Eksekutif)' onClick={() => salinFileTunggal(fileAlurProduksi, setFileAlurProsesLampiran, 'Alur Proses Produksi')} />
+                {renderDynamicBlock("e. Alur Proses Produksi Pabrik", fileAlurProsesLampiran, setFileAlurProsesLampiran)}
+              </>
+            )}
 
             <h4 style={{ backgroundColor: '#e3f2fd', padding: '10px', borderRadius: '4px', color: '#0d47a1', marginTop: '30px' }}>3. Fasilitas Produksi (Pabrik)</h4>
             {renderDynamicBlock("a. Foto Lingkungan Pabrik / Fasilitas Produksi", fileBuktiPabrik, setFileBuktiPabrik)}
@@ -1330,7 +1392,9 @@ function App() {
             {jenisLhv !== 'BMP' && (
               <>
                 {renderDynamicBlock("c. Daftar Gaji Tenaga Kerja dan Kewarganegaraan", fileDaftarGaji, setFileDaftarGaji)}
+                <ReuseButton label='Gunakan file yang sama dari "Kartu Identitas Kewarganegaraan (KTP)" yang sudah diupload' onClick={() => salinDariDaftar(fileKtp, setFileSampelKtp, 'KTP Karyawan')} />
                 {renderDynamicBlock("d. Sampel Dokumen Identitas Tenaga Kerja (KTP)", fileSampelKtp, setFileSampelKtp)}
+                <ReuseButton label='Gunakan file yang sama dari "Struktur Organisasi" yang sudah diupload' onClick={() => salinFileTunggal(fileStruktur, setFileStrukturPabrik, 'Struktur Pabrik')} />
                 {renderDynamicBlock("e. Struktur Organisasi Pabrik", fileStrukturPabrik, setFileStrukturPabrik)}
                 {renderDynamicBlock("f. Daftar Penyusutan Alat Mesin", fileDaftarPenyusutan, setFileDaftarPenyusutan)}
                 {renderDynamicBlock("g. Bukti Pembayaran Token/Listrik", fileBuktiListrik, setFileBuktiListrik)}

@@ -295,17 +295,43 @@
 
     context.aspek_bmp = (state.aspekBmp || []).filter((a) => a.checked).map((a) => a.teks);
 
-    // --- Tabel dinamis rekap bahan baku ---
-    const tableToken = "§§TABLE:bahanbaku§§";
-    context.tabel_dinamis_bahan_baku = tableToken;
-    tableJobs.set(tableToken, { rows: state.rekapBahanBaku || [] });
+    // --- Rekapitulasi Bahan Baku: tabel dinamis, ATAU upload dokumen (PDF/gambar) ---
+    if (state.modeRekapBahanBaku === "upload" && state.fileRekapBahanBaku) {
+      onProgress && onProgress("Memproses dokumen rekapitulasi bahan baku...");
+      let blob = state.fileRekapBahanBaku;
+      if (blob.type === "application/pdf") {
+        const pages = await extractPdfPagesAsBlobs(blob);
+        blob = pages[0] || blob;
+        if (pages.length > 1) {
+          console.warn(
+            `Rekapitulasi Bahan Baku: PDF punya ${pages.length} halaman, hanya halaman pertama yang dipakai (slot tabel cuma menampung 1 gambar).`
+          );
+        }
+      }
+      const imgToken = nextToken("rekapbaku_img");
+      imageJobs.set(imgToken, { blob, widthMm: 160 });
+      context.tabel_dinamis_bahan_baku = imgToken;
+    } else {
+      const tableToken = "§§TABLE:bahanbaku§§";
+      context.tabel_dinamis_bahan_baku = tableToken;
+      tableJobs.set(tableToken, { rows: state.rekapBahanBaku || [] });
+    }
 
     // --- Gambar tunggal ---
     for (const cfg of SINGLE_IMAGE_CONFIG) {
       const file = state[cfg.stateKey];
       if (file) {
+        let blob = file;
+        if (file.type === "application/pdf") {
+          onProgress && onProgress(`Mengekstrak halaman PDF: ${file.name}...`);
+          const pages = await extractPdfPagesAsBlobs(file);
+          blob = pages[0] || file;
+          if (pages.length > 1) {
+            console.warn(`${cfg.contextKey}: PDF punya ${pages.length} halaman, hanya halaman pertama yang dipakai (slot ini cuma menampung 1 gambar).`);
+          }
+        }
         const token = nextToken(cfg.contextKey);
-        imageJobs.set(token, { blob: file, widthMm: cfg.widthMm });
+        imageJobs.set(token, { blob, widthMm: cfg.widthMm });
         context[cfg.contextKey] = token;
       } else {
         context[cfg.contextKey] = "";
