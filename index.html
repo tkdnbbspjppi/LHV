@@ -57,6 +57,11 @@
   <div id="root">
     <div style="text-align:center; padding:60px; font-family:Arial; color:#777;">Memuat aplikasi...</div>
   </div>
+  <script>
+    // Menyimpan URL gambar dari Jinja ke dalam variabel global
+    // agar bisa diakses oleh app-logic.js atau app.jsx
+    window.GLOBAL_FOTO_PRODUK = "{{ foto_produk }}";
+  </script>
 
   <script src="docx-engine.js"></script>
   <script src="excel-render.js"></script>
