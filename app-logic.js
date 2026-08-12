@@ -296,25 +296,52 @@
     context.aspek_bmp = (state.aspekBmp || []).filter((a) => a.checked).map((a) => a.teks);
 
     // --- Rekapitulasi Bahan Baku: tabel dinamis, ATAU upload dokumen (PDF/gambar) ---
+    // Dipakai OLEH DUA MEKANISME BERBEDA di template yang berbeda:
+    //   - tabel_dinamis_bahan_baku : placeholder TUNGGAL (Kerjasama) -- diganti
+    //     jadi <w:tbl> asli, atau gambar utuh kalau mode upload.
+    //   - rekap_bahan_baku          : FOR-LOOP tabel biasa (TKDN & BMP) --
+    //     iterasi array {nama_bahan, produsen, asal} baris per baris.
     if (state.modeRekapBahanBaku === "upload" && state.fileRekapBahanBaku) {
       onProgress && onProgress("Memproses dokumen rekapitulasi bahan baku...");
-      let blob = state.fileRekapBahanBaku;
-      if (blob.type === "application/pdf") {
-        const pages = await extractPdfPagesAsBlobs(blob);
-        blob = pages[0] || blob;
-        if (pages.length > 1) {
-          console.warn(
-            `Rekapitulasi Bahan Baku: PDF punya ${pages.length} halaman, hanya halaman pertama yang dipakai (slot tabel cuma menampung 1 gambar).`
-          );
-        }
+      let pages;
+      if (state.fileRekapBahanBaku.type === "application/pdf") {
+        pages = await extractPdfPagesAsBlobs(state.fileRekapBahanBaku);
+        if (pages.length === 0) pages = [state.fileRekapBahanBaku];
+      } else {
+        pages = [state.fileRekapBahanBaku];
       }
-      const imgToken = nextToken("rekapbaku_img");
-      imageJobs.set(imgToken, { blob, widthMm: 160 });
-      context.tabel_dinamis_bahan_baku = imgToken;
+
+      // tabel_dinamis_bahan_baku (Kerjasama): cuma bisa menampung 1 gambar
+      // di slotnya (placeholder tunggal, bukan loop) -- pakai halaman pertama.
+      const imgTokenTunggal = nextToken("rekapbaku_img");
+      imageJobs.set(imgTokenTunggal, { blob: pages[0], widthMm: 160 });
+      context.tabel_dinamis_bahan_baku = imgTokenTunggal;
+      if (pages.length > 1) {
+        console.warn(
+          `Rekapitulasi Bahan Baku: PDF punya ${pages.length} halaman -- slot tabel_dinamis_bahan_baku (Kerjasama) cuma menampilkan halaman pertama, tapi rekap_bahan_baku (TKDN/BMP) menampilkan SEMUA halaman sebagai baris terpisah.`
+        );
+      }
+
+      // rekap_bahan_baku (TKDN/BMP): FOR-LOOP, jadi SEMUA halaman bisa
+      // ditampilkan -- 1 halaman = 1 baris, gambar disisipkan di kolom
+      // "Bahan Baku".
+      context.rekap_bahan_baku = pages.map((blob, i) => {
+        const token = nextToken("rekapbaku_row" + i);
+        imageJobs.set(token, { blob, widthMm: 60 });
+        return { nama_bahan: token, produsen: "(dokumen upload)", asal: "" };
+      });
     } else {
       const tableToken = "§§TABLE:bahanbaku§§";
       context.tabel_dinamis_bahan_baku = tableToken;
       tableJobs.set(tableToken, { rows: state.rekapBahanBaku || [] });
+
+      context.rekap_bahan_baku = (state.rekapBahanBaku || [])
+        .filter((r) => (r.nama_bahan || "").trim() !== "")
+        .map((r) => ({
+          nama_bahan: r.nama_bahan || "",
+          produsen: r.produsen || "",
+          asal: r.asal || "DN",
+        }));
     }
 
     // --- Gambar tunggal ---
@@ -339,11 +366,25 @@
     }
 
     // --- Gambar dinamis (list) ---
+    // Tata letak galeri foto: 1 gambar besar per baris, 2 (bawaan template),
+    // atau 4 gambar kecil per baris supaya lebih banyak muat per halaman.
+    // "batchOverride" menimpa angka batch(2,...) yang di-hardcode di
+    // template (lihat docx-engine.js); lebar gambar disesuaikan supaya
+    // tetap pas di dalam sel tabel (lebar sel asli template ±82mm).
+    const LAYOUT_MAP = {
+      "1": { batchOverride: 1, widthMm: 78 },
+      "2": { batchOverride: 2, widthMm: 70 },
+      "4": { batchOverride: 2, widthMm: 38 },
+    };
+    const layoutCfg = LAYOUT_MAP[state.layoutGambar] || LAYOUT_MAP["2"];
+    context.__batchOverride = layoutCfg.batchOverride;
+
     for (const cfg of CATEGORY_CONFIG) {
       onProgress && onProgress(`Memproses berkas: ${cfg.contextKey}...`);
+      const widthUntukKategoriIni = cfg.shape === "std" ? layoutCfg.widthMm : cfg.widthMm;
       context[cfg.contextKey] = await buildDynamicList(
         state[cfg.stateKey],
-        cfg.widthMm,
+        widthUntukKategoriIni,
         cfg.shape,
         imageJobs,
         onProgress

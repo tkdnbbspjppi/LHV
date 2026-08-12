@@ -21,20 +21,25 @@
   // --------------------------------------------------------------------
   // 1. Setup lingkungan Nunjucks (mesin templating gaya Jinja2)
   // --------------------------------------------------------------------
-  function buildNunjucksEnv() {
+  function buildNunjucksEnv(batchOverride) {
     const env = new nunjucks.Environment(null, {
       autoescape: true,
       trimBlocks: false,
       lstripBlocks: false,
     });
 
-    // Filter 'batch' — identik dengan Jinja2 batch(n, fill_with)
+    // Filter 'batch' — identik dengan Jinja2 batch(n, fill_with), TAPI kalau
+    // batchOverride diisi (dari pilihan "tata letak galeri foto" di form),
+    // angka "n" yang di-hardcode di template (mis. batch(2, None)) akan
+    // ditimpa dengan batchOverride -- supaya jumlah gambar per baris bisa
+    // diatur dari aplikasi tanpa perlu mengubah file template.
     env.addFilter("batch", function (arr, size, fill) {
+      const effectiveSize = batchOverride || size;
       arr = arr || [];
       const out = [];
-      for (let i = 0; i < arr.length; i += size) {
-        const chunk = arr.slice(i, i + size);
-        while (chunk.length < size) {
+      for (let i = 0; i < arr.length; i += effectiveSize) {
+        const chunk = arr.slice(i, i + effectiveSize);
+        while (chunk.length < effectiveSize) {
           chunk.push(fill !== undefined ? fill : null);
         }
         out.push(chunk);
@@ -245,7 +250,7 @@
     report("Membuka template...");
     const zip = await JSZip.loadAsync(templateArrayBuffer);
 
-    const env = buildNunjucksEnv();
+    const env = buildNunjucksEnv(context.__batchOverride);
     const renderedParts = {}; // partPath -> rendered xml string
 
     report("Menggabungkan tag & merender teks...");

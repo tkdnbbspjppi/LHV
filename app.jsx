@@ -293,11 +293,11 @@ function App() {
     { id: 3, type: 'fixed', aturan: 'Keputusan Menteri Perindustrian Republik Indonesia Nomor 4058 Tahun 2023 tentang Penunjukan Lembaga Verifikasi Independen Pelaksana Penghitungan dan Verifikasi Besaran Nilai TKDN dan BMP' },
     { id: 4, type: 'fixed', aturan: 'Peraturan Sekretaris Jenderal Kementerian Perindustrian Nomor 5 Tahun 2025 tentang Petunjuk Teknis Penghitungan Nilai TKDN Barang dan Jasa Industri' },
     { id: 5, type: 'fixed', aturan: 'Keputusan Kepala Badan Standardisasi dan Kebijakan Jasa Industri Tahun 2026 tentang Pedoman Penyelenggaraan Layanan Penghitungan dan Verifikasi Nilai Tingkat Komponen Dalam Negeri dan Bobot Manfaat Perusahaan di Lingkungan Badan Standardisasi dan Kebijakan Jasa Industri' },
-    { id: 6, type: 'dropdown', aturan: 'Peraturan Direktur Jenderal Industri Logam, Mesin, Alat Transportasi dan Elektronika Kementerian Perindustrian Nomor 3 Tahun 2026 tentang Perubahan Kedua atas Peraturan Direktur Jenderal Industri Logam, Mesin, Alat Transportasi dan Elektronika Nomor 6 Tahun 2025 tentang Rincian Komponen Utama Barang Sektor Industri Logam, Mesin, Alat Transportasi dan Elektronika untuk Penghitungan Nilai Tingkat Komponen Dalam Negeri', options: [
-      'Peraturan Direktur Jenderal Industri Logam, Mesin, Alat Transportasi dan Elektronika Nomor 3 Tahun 2026 tentang Perubahan Kedua Peraturan Direktur Jenderal Industri Logam, Mesin, Alat Transportasi dan Elektronika Nomor 6 Tahun 2025 tentang Rincian Komponen Utama Barang Sektor Industri Logam, Mesin, Alat Transportasi dan Elektronika untuk Penghitungan Nilai Tingkat Komponen Dalam Negeri',
-      'Peraturan Direktur Jenderal Industri Kecil, Menengah, dan Aneka Nomor 113 Tahun 2026 tentang Perubahan atas Peraturan Direktur Jenderal Industri Kecil, Menengah, dan Aneka Nomor 263 Tahun 2025 tentang Rincian Komponen Utama Barang Sektor Industri Kecil, Menengah, dan Aneka untuk Penghitungan Tingkat Komponen Dalam Negeri',
-      'Peraturan Direktur Jenderal Industri Kimia, Farmasi dan Tekstil Nomor 8 Tahun 2026 tentang Perubahan atas Peraturan Direktur Jenderal Industri Kimia, Farmasi dan Tekstil Nomor 1 Tahun 2025 tentang Rincian Komponen Utama Barang Sektor Industri Kimia, Farmasi dan Tekstil untuk Penghitungan Nilai Tingkat Komponen Dalam Negeri',
-      'Peraturan Direktur Jenderal Industri Agro Nomor 2 Tahun 2026 tentang Perubahan atas Peraturan Direktur Jenderal Industri Agro Nomor 1 Tahun 2025 tentang Rincian Komponen Utama Barang Sektor Agro untuk Penghitungan Nilai Tingkat Komponen Dalam Negeri'
+    { id: 6, type: 'dropdown', aturan: 'Peraturan Direktur Jenderal Industri Logam, Mesin, Alat Transportasi dan Elektronika Nomor 6 Tahun 2025 tentang Rincian Komponen Utama Barang Sektor Industri Logam, Mesin, Alat Transportasi dan Elektronika untuk Penghitungan Nilai Tingkat Komponen Dalam Negeri', options: [
+      'Peraturan Direktur Jenderal Industri Logam, Mesin, Alat Transportasi dan Elektronika Kementerian Perindustrian Nomor 2 Tahun 2026 tentang Perubahan atas Peraturan Direahuan Dirjen ILMATE Nomor 6 Tahun 2025 tentang Rincian Komponen Utama Barang Sektor Industri Logam, Mesin, Alat Transportasi dan Elektronika untuk Penghitungan Nilai Tingkat Komponen Dalam Negeri',
+      'Peraturan Direktur Jenderal Industri Kecil, Menengah, dan Aneka Nomor 113 Tahun 2026 tentang Perubahan atas Peraturan Direktur Jenderal Industri Kecil, Menengah, dan Aneka Nomor 263 Tahun 2025 tentang Rincian Komponen Utama Barang Sektor IKMA untuk Penghitungan TKDN',
+      'Peraturan Direktur Jenderal Industri Kimia, Farmasi dan Tekstil Nomor 8 Tahun 2026 tentang Perubahan atas Peraturan Direktur Jenderal Industri Kimia, Farmasi dan Tekstil Nomor 1 Tahun 2025 tentang Rincian Komponen Utama Barang Sektor IKFT untuk Penghitungan Nilai TKDN',
+      'Peraturan Direktur Jenderal Industri Agro Nomor 2 Tahun 2026 tentang Perubahan atas Peraturan Direktur Jenderal Industri Agro Nomor 1 Tahun 2025 tentang Rincian Komponen Utama Barang Sektor Agro untuk Penghitungan Nilai TKDN'
     ]}
   ])
 
@@ -388,6 +388,7 @@ function App() {
   const [fileGeotagging, setFileGeotagging] = useState([{ id: 120, file: null, keterangan: 'Dokumen Kunjungan (Geotagging)' }])
   const [rekapBahanBaku, setRekapBahanBaku] = useState([{ id: 1, nama_bahan: '', produsen: '', asal: 'DN' }])
   const [modeRekapBahanBaku, setModeRekapBahanBaku] = useState('tabel') // 'tabel' | 'upload'
+  const [layoutGambar, setLayoutGambar] = useState('2') // '1' | '2' | '4'
   const [fileRekapBahanBaku, setFileRekapBahanBaku] = useState(null)
 
   // ==========================================
@@ -519,6 +520,7 @@ function App() {
     fileGeotagging: setFileGeotagging,
     rekapBahanBaku: setRekapBahanBaku,
     modeRekapBahanBaku: setModeRekapBahanBaku,
+    layoutGambar: setLayoutGambar,
     fileRekapBahanBaku: setFileRekapBahanBaku,
   };
 
@@ -539,7 +541,7 @@ function App() {
     statusKantor, picKantor, aktaKantor, npwpKantor,
     alamatPabrik, teleponPabrik, faxPabrik, emailPabrik, websitePabrik,
     statusPabrik, picPabrik, aktaPabrik, npwpPabrik,
-    rekapBahanBaku, modeRekapBahanBaku, fileRekapBahanBaku, acuanPeraturan, samaDenganKantor,
+    rekapBahanBaku, modeRekapBahanBaku, fileRekapBahanBaku, layoutGambar, acuanPeraturan, samaDenganKantor,
     fileCover, fileLogo, fileTtdVerifikator, fileStruktur, fileAlurProduksi,
     fileFotoBarang, fileFotoProdukUtama,
     fileStrukturIndustri,
@@ -695,12 +697,6 @@ function App() {
       ? 'LAPORAN HASIL VERIFIKASI NILAI BMP'
       : 'LAPORAN HASIL VERIFIKASI NILAI TKDN BARANG';
     const tahun = (tanggalLhv && tanggalLhv.slice(0, 4)) || new Date().getFullYear();
-    
-    // Cek apakah ada foto produk yang diupload di tab Lampiran
-    const fotoLampiran = (fileFotoProduk && fileFotoProduk.length > 0 && fileFotoProduk[0].file) 
-      ? fileFotoProduk[0].file 
-      : null;
-
     return {
       judulLaporan,
       namaLembaga: namaLembagaCover,
@@ -710,14 +706,8 @@ function App() {
       kbliDeskripsi,
       jenisBarang,
       tahun,
-      baseColor: coverColor, // <--- Ini akan mengatur warna bingkai secara dinamis sesuai pilihan
-
-      // --- UPDATE DI BARIS INI ---
-      // Logika: Jika user upload "Foto Cover", pakai itu. 
-      // Jika kosong, otomatis ambil "Foto Produk Utama" atau "Foto Barang" atau "Foto Lampiran".
-      fotoProdukBlob: fileFotoCover || fileFotoProdukUtama || fileFotoBarang || fotoLampiran,
-      // ---------------------------
-
+      baseColor: coverColor,
+      fotoProdukBlob: fileFotoCover,
       logoKemenperinSrc: logoKemenperin,
       logoBbsSrc: logoBBS,
     };
@@ -1227,6 +1217,25 @@ function App() {
         {activeTab === 4 && (
           <div>
             <h3 style={{ color: '#333', marginTop: 0, marginBottom: '20px' }}>Dokumen Pendukung ({jenisLhv})</h3>
+
+            <div style={{ padding: '15px', backgroundColor: '#fff8e1', border: '1px solid #ffe082', borderRadius: '6px', marginBottom: '20px' }}>
+              <label style={{ fontWeight: 'bold', fontSize: '13px' }}>🖼️ Tata Letak Galeri Foto (berlaku untuk semua bagian di tab ini):</label>
+              <div style={{ display: 'flex', gap: '15px', marginTop: '8px', flexWrap: 'wrap' }}>
+                <label style={{ fontWeight: 'normal', cursor: 'pointer', fontSize: '13px' }}>
+                  <input type="radio" checked={layoutGambar === '1'} onChange={() => setLayoutGambar('1')} /> 1 foto besar per baris
+                </label>
+                <label style={{ fontWeight: 'normal', cursor: 'pointer', fontSize: '13px' }}>
+                  <input type="radio" checked={layoutGambar === '2'} onChange={() => setLayoutGambar('2')} /> 2 foto per baris (bawaan)
+                </label>
+                <label style={{ fontWeight: 'normal', cursor: 'pointer', fontSize: '13px' }}>
+                  <input type="radio" checked={layoutGambar === '4'} onChange={() => setLayoutGambar('4')} /> 4 foto kecil (hemat halaman)
+                </label>
+              </div>
+              <p style={{ fontSize: '11px', color: '#777', margin: '8px 0 0 0' }}>
+                Catatan: struktur tabel di template tetap 2 kolom. "1 foto besar" menampilkan 1 foto per baris (kolom sebelahnya kosong).
+                "4 foto kecil" tetap 2 kolom tapi ukuran foto diperkecil, sehingga lebih banyak baris (dan foto) yang muat dalam 1 halaman cetak.
+              </p>
+            </div>
             
             {jenisLhv === 'BMP' ? (
               <>
