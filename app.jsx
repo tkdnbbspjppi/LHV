@@ -363,6 +363,7 @@ function App() {
   // ==========================================
   // STATE MENU 5: LAMPIRAN
   // ==========================================
+  const [fileDokumenPengembangan, setFileDokumenPengembangan] = useState([{ id: 100, file: null, keterangan: 'Dokumen Pengembangan' }])
   const [fileNibRba, setFileNibRba] = useState([{ id: 101, file: null, keterangan: 'NIB RBA' }])
   const [fileSertifikatStandar, setFileSertifikatStandar] = useState([{ id: 102, file: null, keterangan: 'Sertifikat Standar' }])
   const [fileIzinUsaha, setFileIzinUsaha] = useState([{ id: 103, file: null, keterangan: 'Izin Usaha' }])
@@ -498,6 +499,7 @@ function App() {
     fileEsgBmp: setFileEsgBmp,
     fileAwardsBmp: setFileAwardsBmp,
     fileSiinasBmp: setFileSiinasBmp,
+    fileDokumenPengembangan: setFileDokumenPengembangan,
     fileNibRba: setFileNibRba,
     fileSertifikatStandar: setFileSertifikatStandar,
     fileIzinUsaha: setFileIzinUsaha,
@@ -554,7 +556,7 @@ function App() {
     fileMesinDnBmp, fileLokasiBmp, fileI40Bmp, fileSdmBmp, fileSertifikatBmp,
     fileHijauBmp, fileEksporBmp, fileMerekDnBmp, fileEsgBmp, fileAwardsBmp,
     fileSiinasBmp,
-    fileNibRba, fileSertifikatStandar, fileIzinUsaha, fileNpwpLampiran,
+    fileDokumenPengembangan, fileNibRba, fileSertifikatStandar, fileIzinUsaha, fileNpwpLampiran,
     fileSertifikatMerek, fileSertifikatProduk, fileNie, fileBpom,
     fileFotoProduk, fileFotoBahanBaku, fileInvoiceBahanBaku,
     fileAlurProsesLampiran, fileDaftarGaji, fileSampelKtp, fileStrukturPabrik,
@@ -1421,6 +1423,9 @@ function App() {
           <div>
             <h3 style={{ borderBottom: '2px solid #ddd', paddingBottom: '10px' }}>Berkas Lampiran LHV Dokumen</h3>
             
+            <h4 style={{ backgroundColor: '#f3e5f5', padding: '10px', borderRadius: '4px', color: '#6a1b9a' }}>0. Dokumen Pengembangan</h4>
+            {renderDynamicBlock("Dokumen Pengembangan", fileDokumenPengembangan, setFileDokumenPengembangan)}
+
             <h4 style={{ backgroundColor: '#e3f2fd', padding: '10px', borderRadius: '4px', color: '#0d47a1' }}>1. Legalitas Perusahaan</h4>
             {renderDynamicBlock("a. NIB RBA", fileNibRba, setFileNibRba)}
             {renderDynamicBlock("b. Sertifikat Standar", fileSertifikatStandar, setFileSertifikatStandar)}

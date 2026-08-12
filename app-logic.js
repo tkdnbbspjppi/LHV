@@ -49,6 +49,7 @@
     { stateKey: "fileAwardsBmp", contextKey: "bmp_awards", widthMm: 70, shape: "std" },
     { stateKey: "fileSiinasBmp", contextKey: "bmp_siinas", widthMm: 70, shape: "std" },
 
+    { stateKey: "fileDokumenPengembangan", contextKey: "dokumen_pengembangan", widthMm: 70, shape: "std" },
     { stateKey: "fileNibRba", contextKey: "nib_rba", widthMm: 70, shape: "std" },
     { stateKey: "fileSertifikatStandar", contextKey: "sert_standar", widthMm: 70, shape: "std" },
     { stateKey: "fileIzinUsaha", contextKey: "izin_usaha", widthMm: 70, shape: "std" },
