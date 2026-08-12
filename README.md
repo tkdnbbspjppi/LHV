@@ -74,6 +74,18 @@ lewat `file://` karena browser memblokir `fetch()` ke file template pada mode te
      (`<w:drawing>`), lengkap dengan relasi file & ukuran (mm) — pengganti `InlineImage` docxtpl.
   5. Menyisipkan tabel rekap bahan baku sebagai tabel Word asli — pengganti fitur `subdoc` docxtpl.
   6. Menyusun ulang menjadi file `.docx` dan otomatis diunduh ke komputer verifikator.
+- **Audit kelengkapan template** — seluruh 3 file template diperiksa ulang tag demi tag (bukan
+  ditebak): ditemukan `rekap_bahan_baku` (tabel "Rekapitulasi Bahan Baku" di TKDN & BMP) **tidak
+  pernah diisi** oleh kode sebelumnya sehingga tabelnya selalu kosong walau sudah diisi di form —
+  sekarang sudah diperbaiki. Semua field lain sudah dikonfirmasi lengkap lewat pengecekan otomatis
+  (dibandingkan setiap tag `{{ }}`/`{% for %}` di template terhadap context yang dihasilkan kode).
+- **Tata Letak Galeri Foto (1/2/4 per baris)** — di tab "4. Dokumen Pendukung" ada pilihan jumlah foto
+  per baris. Struktur tabel di template tetap 2 kolom (tidak diubah), jadi: **"1 foto besar"** = 1 foto
+  per baris (kolom sebelahnya kosong), **"2 foto" (bawaan)** = seperti sebelumnya, **"4 foto kecil"** =
+  ukuran foto diperkecil supaya lebih banyak baris/foto muat dalam 1 halaman cetak.
+- **Update template terbaru** — folder `templates/` sudah diperbarui dengan 3 file template TKDN/BMP/
+  Kerjasama versi terbaru (termasuk penambahan tabel Rekapitulasi Bahan Baku ke TKDN, dan logo di
+  header TKDN).
 - **Ekstraksi gambar dari PDF** (`app-logic.js`) — pengganti `pypdf`: setiap **halaman PDF** yang
   diunggah dirender menjadi 1 gambar (via **pdf.js**), lalu diperlakukan sama seperti foto biasa.
   *(Catatan desain: ini sedikit berbeda dari backend lama yang mengekstrak gambar mentah dari dalam
