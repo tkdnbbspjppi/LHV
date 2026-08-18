@@ -26,6 +26,10 @@
 (function (global) {
   'use strict';
 
+  // Penanda versi — buka Console (F12) setelah reload halaman untuk
+  // memastikan file YANG BARU ini yang benar-benar termuat (bukan cache lama).
+  console.log('[CoverGenerator] v4 loaded — lebar teks 520/700px, badge tahun aktif');
+
   const CANVAS_W = 1414;
   const CANVAS_H = 2000;
   const COLOR_NAVY = '#262362';
@@ -70,7 +74,14 @@
       noLhv: { x: 296, y: 322, fontSize: 40, color: COLOR_NAVY, weight: 700, maxWidth: 950 },
       namaPerusahaan: { x: 124, yTop: 742, width: 700, fontSize: 30, lineHeight: 42, color: COLOR_BLUE, weight: 600, maxLines: 3 },
       namaPerusahaanIndustriPrefix: 'Kerjasama dengan: ',
-      photo: null,
+      // Area foto lebar (mengganti ilustrasi langit/bukit bawaan template),
+      // dibatasi pita diagonal navy di atas & pita diagonal aksen di bawah.
+      // Koordinat diukur langsung dari pixel bmp-1.png (berlaku utk bmp-1..5,
+      // kelimanya memakai proporsi diagonal yang sama).
+      photo: {
+        type: 'quad',
+        points: [[0, 1046], [1413, 652], [1413, 1481], [0, 1774]],
+      },
       tahun: { x: 124, y: 1850, fontSize: 48, color: COLOR_NAVY, weight: 800 },
     },
     jasa: {
@@ -163,6 +174,8 @@
   }
 
   // ---------------- util foto ----------------
+  // "contain": foto pas di dalam kotak, proporsional, tanpa terpotong
+  // (dipakai untuk bentuk heksagon TKDN & lingkaran Jasa)
   function drawImageFitCentered(ctx, img, cx, cy, w, h) {
     const imgRatio = img.width / img.height;
     const boxRatio = w / h;
@@ -175,6 +188,20 @@
       drawW = h * imgRatio;
     }
     ctx.drawImage(img, 0, 0, img.width, img.height, cx - drawW / 2, cy - drawH / 2, drawW, drawH);
+  }
+
+  // "cover": foto memenuhi seluruh kotak, kelebihannya dipotong
+  // (dipakai untuk area foto lebar BMP, mis. foto gedung/fasilitas)
+  function drawImageCover(ctx, img, cx, cy, w, h) {
+    const imgRatio = img.width / img.height;
+    const boxRatio = w / h;
+    let sx, sy, sw, sh;
+    if (imgRatio > boxRatio) {
+      sh = img.height; sw = sh * boxRatio; sx = (img.width - sw) / 2; sy = 0;
+    } else {
+      sw = img.width; sh = sw / boxRatio; sx = 0; sy = (img.height - sh) / 2;
+    }
+    ctx.drawImage(img, sx, sy, sw, sh, cx - w / 2, cy - h / 2, w, h);
   }
 
   function clipPolygon(ctx, points) {
@@ -206,6 +233,15 @@
       ctx.clip();
       const d = shapeCfg.innerRadius * 2;
       drawImageFitCentered(ctx, img, shapeCfg.cx, shapeCfg.cy, d, d);
+    } else if (shapeCfg.type === 'quad') {
+      const pts = shapeCfg.points;
+      clipPolygon(ctx, pts);
+      const xs = pts.map((p) => p[0]);
+      const ys = pts.map((p) => p[1]);
+      const minX = Math.min(...xs), maxX = Math.max(...xs);
+      const minY = Math.min(...ys), maxY = Math.max(...ys);
+      const w = maxX - minX, h = maxY - minY;
+      drawImageCover(ctx, img, minX + w / 2, minY + h / 2, w, h);
     }
     ctx.restore();
   }
@@ -283,17 +319,40 @@
     // 6. Nama Produk / Nama Jasa
     if (namaProduk && posCfg.namaProduk) drawWrappedText(ctx, namaProduk, posCfg.namaProduk);
 
-    // 7. Tahun — diambil otomatis dari 4 digit angka pertama pada No. LHV,
-    //    sama seperti perilaku di cover-LHV; kalau tidak ketemu, pakai tahun berjalan.
+    // 7. Tahun — diambil otomatis dari 4 digit angka pertama pada No. LHV
+    //    (mis. "TKDN2026-8-BBSPJPPI-..." -> "2026"); kalau tidak ketemu,
+    //    pakai tahun berjalan. Digambar sebagai badge/pil solid berwarna
+    //    navy dengan angka putih tebal di tengah, supaya PASTI terlihat
+    //    kontras di atas template apa pun (tidak bergantung pada gambar
+    //    badge yang mungkin/tidak ada di file PNG template).
     if (posCfg.tahun) {
       let displayYear = new Date().getFullYear().toString();
       if (noLhv) {
         const matchYear = noLhv.match(/\d{4}/);
         if (matchYear) displayYear = matchYear[0];
       }
-      ctx.font = `${posCfg.tahun.weight} ${posCfg.tahun.fontSize}px ${FONT_FAMILY}`;
-      ctx.fillStyle = posCfg.tahun.color;
-      ctx.fillText(displayYear, posCfg.tahun.x, posCfg.tahun.y);
+      const t = posCfg.tahun;
+      ctx.font = `${t.weight} ${t.fontSize}px ${FONT_FAMILY}`;
+      const textW = ctx.measureText(displayYear).width;
+      const padX = 28, padY = 16;
+      const boxW = textW + padX * 2;
+      const boxH = t.fontSize + padY * 2;
+      const boxX = t.x - padX;
+      const boxY = t.y - t.fontSize * 0.9 - padY + 6; // sejajarkan dgn baseline teks
+      const radius = 16;
+
+      ctx.fillStyle = COLOR_NAVY;
+      ctx.beginPath();
+      ctx.moveTo(boxX + radius, boxY);
+      ctx.arcTo(boxX + boxW, boxY, boxX + boxW, boxY + boxH, radius);
+      ctx.arcTo(boxX + boxW, boxY + boxH, boxX, boxY + boxH, radius);
+      ctx.arcTo(boxX, boxY + boxH, boxX, boxY, radius);
+      ctx.arcTo(boxX, boxY, boxX + boxW, boxY, radius);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(displayYear, t.x, t.y);
     }
 
     return new Promise((resolve) => {
