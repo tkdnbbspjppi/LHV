@@ -1,15 +1,18 @@
 /* ==========================================================================
-   cover-generator.js  (v2 — berbasis template gambar, diambil dari
-   proyek https://github.com/tkdnbbspjppi/cover-LHV)
+   cover-generator.js  (v3 — sinkron 1:1 dengan engine di
+   https://github.com/tkdnbbspjppi/cover-LHV)
    ------------------------------------------------------------------------
    Menggambar teks & foto produk DI ATAS 11 template desain PNG resmi
-   (bukan lagi digambar dari nol), lalu menghasilkannya sebagai Blob PNG.
+   (assets/tkdn-1..5.png, assets/bmp-1..5.png, assets/jasa-1.png),
+   lalu menghasilkannya sebagai Blob PNG.
 
-   API publik dipertahankan sama seperti versi lama supaya app.jsx tidak
-   perlu dirombak total:
+   API publik dipertahankan sama seperti versi sebelumnya supaya app.jsx
+   tidak perlu dirombak:
        CoverGenerator.generateCoverImage(opts) -> Promise<Blob>
+       CoverGenerator.TEMPLATES  (dipakai untuk isi dropdown varian)
+       CoverGenerator.CATEGORIES
 
-   opts yang dipakai versi baru ini:
+   opts yang dipakai:
      - categoryKey   : 'tkdn_sendiri' | 'tkdn_kerjasama' | 'bmp' | 'tkdn_jasa'
      - templateId    : id varian, mis. 'tkdn-3', 'bmp-1', 'jasa-1'
      - noLhv
@@ -29,8 +32,7 @@
   const COLOR_BLUE = '#2838a7';
   const FONT_FAMILY = "'Poppins', sans-serif";
 
-  // Lokasi folder template — file tkdn-*.png / bmp-*.png / jasa-*.png
-  // diupload langsung ke dalam assets/ (sejajar dengan logo-*.png).
+  // File tkdn-*.png / bmp-*.png / jasa-*.png ada langsung di dalam assets/
   const TEMPLATE_BASE = 'assets/';
 
   const CATEGORIES = {
@@ -46,33 +48,40 @@
     jasa: ['jasa-1'],
   };
 
+  // Konfigurasi posisi teks & foto — disalin persis dari cover-LHV/index.html
   const POS = {
     tkdn: {
-      noLhv: { x: 336, y: 313, fontSize: 34, color: COLOR_NAVY, weight: 700, maxWidth: 930 },
-      namaPerusahaan: { x: 144, yTop: 758, width: 900, fontSize: 30, lineHeight: 42, color: COLOR_BLUE, weight: 600, maxLines: 3 },
+      marginX: 144,
+      noLhv: { x: 336, y: 313, fontSize: 40, color: COLOR_NAVY, weight: 700, maxWidth: 930 },
+      namaPerusahaan: { x: 144, yTop: 758, width: 520, fontSize: 30, lineHeight: 42, color: COLOR_BLUE, weight: 600, maxLines: 3 },
       namaPerusahaanIndustriPrefix: 'Kerjasama dengan: ',
-      bidangUsaha: { x: 144, yTop: 948, width: 1000, fontSize: 30, lineHeight: 42, color: COLOR_BLUE, weight: 600, maxLines: 3 },
-      namaProduk: { x: 144, yTop: 1207, width: 1000, fontSize: 30, lineHeight: 42, color: COLOR_BLUE, weight: 600, maxLines: 3 },
+      bidangUsaha: { x: 144, yTop: 948, width: 520, fontSize: 30, lineHeight: 42, color: COLOR_BLUE, weight: 600, maxLines: 4 },
+      namaProduk: { x: 144, yTop: 1207, width: 520, fontSize: 30, lineHeight: 42, color: COLOR_BLUE, weight: 600, maxLines: 4 },
       photo: {
         type: 'polygon',
         outer: [[1020, 938], [669, 1142], [669, 1553], [1022, 1757], [1373, 1553], [1373, 1142]],
         centroid: [1021, 1347.5],
         innerScale: 0.925,
       },
+      tahun: { x: 144, y: 1850, fontSize: 48, color: COLOR_NAVY, weight: 800 },
     },
     bmp: {
-      noLhv: { x: 296, y: 322, fontSize: 34, color: COLOR_NAVY, weight: 700, maxWidth: 950 },
-      namaPerusahaan: { x: 124, yTop: 742, width: 900, fontSize: 30, lineHeight: 42, color: COLOR_BLUE, weight: 600, maxLines: 3 },
+      marginX: 124,
+      noLhv: { x: 296, y: 322, fontSize: 40, color: COLOR_NAVY, weight: 700, maxWidth: 950 },
+      namaPerusahaan: { x: 124, yTop: 742, width: 700, fontSize: 30, lineHeight: 42, color: COLOR_BLUE, weight: 600, maxLines: 3 },
       namaPerusahaanIndustriPrefix: 'Kerjasama dengan: ',
       photo: null,
+      tahun: { x: 124, y: 1850, fontSize: 48, color: COLOR_NAVY, weight: 800 },
     },
     jasa: {
-      noLhv: { x: 306, y: 408, fontSize: 34, color: COLOR_NAVY, weight: 700, maxWidth: 950 },
-      namaPerusahaan: { x: 144, yTop: 800, width: 850, fontSize: 30, lineHeight: 42, color: COLOR_BLUE, weight: 600, maxLines: 3 },
+      marginX: 144,
+      noLhv: { x: 306, y: 408, fontSize: 40, color: COLOR_NAVY, weight: 700, maxWidth: 950 },
+      namaPerusahaan: { x: 144, yTop: 800, width: 520, fontSize: 30, lineHeight: 42, color: COLOR_BLUE, weight: 600, maxLines: 3 },
       namaPerusahaanIndustriPrefix: 'Kerjasama dengan: ',
-      bidangUsaha: { x: 144, yTop: 1112, width: 850, fontSize: 30, lineHeight: 42, color: COLOR_BLUE, weight: 600, maxLines: 3 },
-      namaProduk: { x: 144, yTop: 1251, width: 850, fontSize: 30, lineHeight: 42, color: COLOR_BLUE, weight: 600, maxLines: 3 },
+      bidangUsaha: { x: 144, yTop: 1112, width: 520, fontSize: 30, lineHeight: 42, color: COLOR_BLUE, weight: 600, maxLines: 4 },
+      namaProduk: { x: 144, yTop: 1251, width: 520, fontSize: 30, lineHeight: 42, color: COLOR_BLUE, weight: 600, maxLines: 4 },
       photo: { type: 'circle', cx: 1010, cy: 1272, innerRadius: 316 },
+      tahun: { x: 144, y: 1850, fontSize: 48, color: COLOR_NAVY, weight: 800 },
     },
   };
 
@@ -140,30 +149,32 @@
     });
   }
 
-  function drawSingleLineAutoFit(ctx, text, cfg) {
+  function drawSingleLineAutoFit(ctx, text, x, y, maxWidth, fontSize, weight, color) {
     if (!text) return;
-    let size = cfg.fontSize;
-    ctx.fillStyle = cfg.color;
+    let size = fontSize;
+    ctx.fillStyle = color;
     for (let attempt = 0; attempt < 8; attempt++) {
-      ctx.font = `${cfg.weight} ${size}px ${FONT_FAMILY}`;
-      if (ctx.measureText(text).width <= cfg.maxWidth || size <= 14) break;
+      ctx.font = `${weight} ${size}px ${FONT_FAMILY}`;
+      if (ctx.measureText(text).width <= maxWidth || size <= 14) break;
       size -= 1.5;
     }
-    ctx.font = `${cfg.weight} ${size}px ${FONT_FAMILY}`;
-    ctx.fillText(text, cfg.x, cfg.y);
+    ctx.font = `${weight} ${size}px ${FONT_FAMILY}`;
+    ctx.fillText(text, x, y);
   }
 
   // ---------------- util foto ----------------
-  function drawImageCover(ctx, img, cx, cy, w, h) {
+  function drawImageFitCentered(ctx, img, cx, cy, w, h) {
     const imgRatio = img.width / img.height;
     const boxRatio = w / h;
-    let sx, sy, sw, sh;
+    let drawW, drawH;
     if (imgRatio > boxRatio) {
-      sh = img.height; sw = sh * boxRatio; sx = (img.width - sw) / 2; sy = 0;
+      drawW = w;
+      drawH = w / imgRatio;
     } else {
-      sw = img.width; sh = sw / boxRatio; sx = 0; sy = (img.height - sh) / 2;
+      drawH = h;
+      drawW = h * imgRatio;
     }
-    ctx.drawImage(img, sx, sy, sw, sh, cx - w / 2, cy - h / 2, w, h);
+    ctx.drawImage(img, 0, 0, img.width, img.height, cx - drawW / 2, cy - drawH / 2, drawW, drawH);
   }
 
   function clipPolygon(ctx, points) {
@@ -187,14 +198,14 @@
       const w = Math.max(...xs) - Math.min(...xs);
       const h = Math.max(...ys) - Math.min(...ys);
       clipPolygon(ctx, inner);
-      drawImageCover(ctx, img, cx, cy, w, h);
+      drawImageFitCentered(ctx, img, cx, cy, w, h);
     } else if (shapeCfg.type === 'circle') {
       ctx.beginPath();
       ctx.arc(shapeCfg.cx, shapeCfg.cy, shapeCfg.innerRadius, 0, Math.PI * 2);
       ctx.closePath();
       ctx.clip();
       const d = shapeCfg.innerRadius * 2;
-      drawImageCover(ctx, img, shapeCfg.cx, shapeCfg.cy, d, d);
+      drawImageFitCentered(ctx, img, shapeCfg.cx, shapeCfg.cy, d, d);
     }
     ctx.restore();
   }
@@ -222,7 +233,7 @@
     canvas.height = CANVAS_H;
     const ctx = canvas.getContext('2d');
 
-    // Pastikan font Poppins sudah siap sebelum menggambar teks
+    // Pastikan font Poppins sudah siap sebelum menggambar teks (sama seperti cover-LHV)
     if (document.fonts && document.fonts.ready) {
       try { await document.fonts.ready; } catch (e) { /* abaikan */ }
     }
@@ -231,8 +242,7 @@
     const bgImg = await loadImage(TEMPLATE_BASE + resolvedTemplateId + '.png');
     ctx.drawImage(bgImg, 0, 0, CANVAS_W, CANVAS_H);
 
-    // 2. Foto produk/jasa (digambar dulu, sebelum teks, karena border
-    //    bentuk sudah ada di dalam template)
+    // 2. Foto produk/jasa
     if (posCfg.photo && fotoProdukBlob) {
       try {
         const photoImg = await loadImageFromBlob(fotoProdukBlob);
@@ -243,7 +253,13 @@
     }
 
     // 3. No. LHV
-    if (noLhv) drawSingleLineAutoFit(ctx, noLhv, posCfg.noLhv);
+    if (noLhv) {
+      drawSingleLineAutoFit(
+        ctx, noLhv,
+        posCfg.noLhv.x, posCfg.noLhv.y, posCfg.noLhv.maxWidth,
+        posCfg.noLhv.fontSize, posCfg.noLhv.weight, posCfg.noLhv.color
+      );
+    }
 
     // 4. Nama Perusahaan (+ Nama Perusahaan Industri jika kerjasama)
     if (namaPerusahaan) {
@@ -267,6 +283,19 @@
     // 6. Nama Produk / Nama Jasa
     if (namaProduk && posCfg.namaProduk) drawWrappedText(ctx, namaProduk, posCfg.namaProduk);
 
+    // 7. Tahun — diambil otomatis dari 4 digit angka pertama pada No. LHV,
+    //    sama seperti perilaku di cover-LHV; kalau tidak ketemu, pakai tahun berjalan.
+    if (posCfg.tahun) {
+      let displayYear = new Date().getFullYear().toString();
+      if (noLhv) {
+        const matchYear = noLhv.match(/\d{4}/);
+        if (matchYear) displayYear = matchYear[0];
+      }
+      ctx.font = `${posCfg.tahun.weight} ${posCfg.tahun.fontSize}px ${FONT_FAMILY}`;
+      ctx.fillStyle = posCfg.tahun.color;
+      ctx.fillText(displayYear, posCfg.tahun.x, posCfg.tahun.y);
+    }
+
     return new Promise((resolve) => {
       canvas.toBlob((blob) => resolve(blob), 'image/png');
     });
@@ -274,7 +303,7 @@
 
   global.CoverGenerator = {
     generateCoverImage,
-    TEMPLATES,     // diekspos supaya app.jsx bisa mengisi dropdown varian
+    TEMPLATES,
     CATEGORIES,
   };
 })(window);
