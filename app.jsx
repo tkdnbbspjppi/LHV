@@ -213,6 +213,16 @@ function App() {
   const [coverMode, setCoverMode] = useState('auto') // 'auto' | 'upload'
   const [coverColor, setCoverColor] = useState('#8e3d9c')
   const [templateVarian, setTemplateVarian] = useState('tkdn-1')
+  // Pastikan templateVarian selalu valid untuk skema yang sedang dipilih —
+// mencegah bug "klik bmp-1 tapi preview-nya tkdn-1" akibat state lama
+// yang tidak sinkron dengan daftar opsi dropdown yang berubah.
+useEffect(() => {
+  const group = jenisLhv === 'BMP' ? 'bmp' : jenisLhv === 'Jasa' ? 'jasa' : 'tkdn';
+  const validList = (typeof CoverGenerator !== 'undefined' && CoverGenerator.TEMPLATES[group]) || [];
+  if (!validList.includes(templateVarian)) {
+    setTemplateVarian(validList[0] || '');
+  }
+}, [jenisLhv]);
   const [kbliDeskripsi, setKbliDeskripsi] = useState('')
   const [namaLembagaCover, setNamaLembagaCover] = useState('LVI BSKJI - Balai Besar Standardisasi dan Pelayanan Jasa Pencegahan Pencemaran Industri')
   const [fileFotoCover, setFileFotoCover] = useState(null)
