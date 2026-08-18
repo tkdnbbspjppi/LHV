@@ -212,6 +212,7 @@ function App() {
   const [fileCover, setFileCover] = useState(null)
   const [coverMode, setCoverMode] = useState('auto') // 'auto' | 'upload'
   const [coverColor, setCoverColor] = useState('#8e3d9c')
+  const [templateVarian, setTemplateVarian] = useState('tkdn-1')
   const [kbliDeskripsi, setKbliDeskripsi] = useState('')
   const [namaLembagaCover, setNamaLembagaCover] = useState('LVI BSKJI - Balai Besar Standardisasi dan Pelayanan Jasa Pencegahan Pencemaran Industri')
   const [fileFotoCover, setFileFotoCover] = useState(null)
@@ -695,23 +696,19 @@ function App() {
   // GENERATE COVER OTOMATIS
   // ==========================================
   const buildCoverOptions = () => {
-    const judulLaporan = jenisLhv === 'BMP'
-      ? 'LAPORAN HASIL VERIFIKASI NILAI BMP'
-      : 'LAPORAN HASIL VERIFIKASI NILAI TKDN BARANG';
-    const tahun = (tanggalLhv && tanggalLhv.slice(0, 4)) || new Date().getFullYear();
+    const categoryKey = jenisLhv === 'BMP' ? 'bmp'
+      : jenisLhv === 'Kerjasama' ? 'tkdn_kerjasama'
+      : jenisLhv === 'Jasa' ? 'tkdn_jasa'
+      : 'tkdn_sendiri';
     return {
-      judulLaporan,
-      namaLembaga: namaLembagaCover,
+      categoryKey,
+      templateId: templateVarian,
       noLhv: LHVLogic.buildNoLhv({ jenisLhv, tanggalLhv, idBerkas, namaVerifikator }),
       namaPerusahaan,
-      kbliKode: kbli,
-      kbliDeskripsi,
-      jenisBarang,
-      tahun,
-      baseColor: coverColor,
+      namaPerusahaanIndustri: jenisLhv === 'Kerjasama' ? namaPerusahaanIndustri : '',
+      bidangUsaha: kbliDeskripsi,
+      namaProduk: jenisBarang,
       fotoProdukBlob: fileFotoCover,
-      logoKemenperinSrc: logoKemenperin,
-      logoBbsSrc: logoBBS,
     };
   };
 
@@ -885,8 +882,12 @@ function App() {
                   </p>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                     <div>
-                      <label style={{ fontWeight: 'bold', fontSize: '13px' }}>Warna Aksen Cover:</label><br/>
-                      <input type="color" value={coverColor} onChange={(e) => setCoverColor(e.target.value)} style={{ width: '100%', height: '38px', marginTop: '6px', cursor: 'pointer' }}/>
+                      <label style={{ fontWeight: 'bold', fontSize: '13px' }}>Varian Desain Cover:</label><br/>
+                      <select value={templateVarian} onChange={(e) => setTemplateVarian(e.target.value)} style={inputStyle}>
+                      {(CoverGenerator.TEMPLATES[jenisLhv === 'BMP' ? 'bmp' : jenisLhv === 'Jasa' ? 'jasa' : 'tkdn'] || []).map(id => (
+                      <option key={id} value={id}>{id}</option>
+                      ))}
+                      </select>
                     </div>
                     <div>
                       <label style={{ fontWeight: 'bold', fontSize: '13px' }}>Foto Produk untuk Cover:</label><br/>
