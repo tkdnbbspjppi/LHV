@@ -28,7 +28,7 @@
 
   // Penanda versi — buka Console (F12) setelah reload halaman untuk
   // memastikan file YANG BARU ini yang benar-benar termuat (bukan cache lama).
-  console.log('[CoverGenerator] v4 loaded — lebar teks 520/700px, badge tahun aktif');
+  console.log('[CoverGenerator] v5 loaded — baseline No.LHV BMP diperbaiki, foto BMP aktif');
 
   const CANVAS_W = 1414;
   const CANVAS_H = 2000;
@@ -71,7 +71,7 @@
     },
     bmp: {
       marginX: 124,
-      noLhv: { x: 296, y: 322, fontSize: 40, color: COLOR_NAVY, weight: 700, maxWidth: 950 },
+      noLhv: { x: 300, y: 327, fontSize: 36, color: COLOR_NAVY, weight: 700, maxWidth: 950 },
       namaPerusahaan: { x: 124, yTop: 742, width: 700, fontSize: 30, lineHeight: 42, color: COLOR_BLUE, weight: 600, maxLines: 3 },
       namaPerusahaanIndustriPrefix: 'Kerjasama dengan: ',
       // Area foto lebar (mengganti ilustrasi langit/bukit bawaan template),
@@ -280,12 +280,18 @@
 
     // 2. Foto produk/jasa
     if (posCfg.photo && fotoProdukBlob) {
+      console.log('[CoverGenerator] mencoba menggambar foto ke area', posCfg.photo.type, 'ukuran blob:', fotoProdukBlob.size, 'bytes');
       try {
         const photoImg = await loadImageFromBlob(fotoProdukBlob);
         drawPhotoShape(ctx, photoImg, posCfg.photo);
+        console.log('[CoverGenerator] foto berhasil digambar');
       } catch (e) {
-        console.warn('Cover: gagal memuat foto produk', e);
+        console.error('[CoverGenerator] GAGAL menggambar foto:', e);
       }
+    } else if (posCfg.photo && !fotoProdukBlob) {
+      console.log('[CoverGenerator] area foto tersedia untuk kategori ini tapi fotoProdukBlob kosong (belum ada file diupload)');
+    } else if (!posCfg.photo) {
+      console.log('[CoverGenerator] kategori', categoryKey, '(group', group, ') tidak punya area foto di konfigurasi POS');
     }
 
     // 3. No. LHV
