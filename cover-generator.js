@@ -28,7 +28,7 @@
 
   // Penanda versi — buka Console (F12) setelah reload halaman untuk
   // memastikan file YANG BARU ini yang benar-benar termuat (bukan cache lama).
-  console.log('[CoverGenerator] v5 loaded — baseline No.LHV BMP diperbaiki, foto BMP aktif');
+  console.log('[CoverGenerator] v6 loaded — pita aksen BMP tidak lagi tertutup foto, nama perusahaan dipindah ke bawah pita');
 
   const CANVAS_W = 1414;
   const CANVAS_H = 2000;
@@ -72,7 +72,7 @@
     bmp: {
       marginX: 124,
       noLhv: { x: 300, y: 327, fontSize: 36, color: COLOR_NAVY, weight: 700, maxWidth: 950 },
-      namaPerusahaan: { x: 124, yTop: 742, width: 700, fontSize: 30, lineHeight: 42, color: COLOR_BLUE, weight: 600, maxLines: 3 },
+      namaPerusahaan: { x: 750, yTop: 1650, width: 580, fontSize: 28, lineHeight: 38, color: COLOR_NAVY, weight: 600, maxLines: 2 },
       namaPerusahaanIndustriPrefix: 'Kerjasama dengan: ',
       // Area foto lebar (mengganti ilustrasi langit/bukit bawaan template),
       // dibatasi pita diagonal navy di atas & pita diagonal aksen di bawah.
@@ -81,6 +81,10 @@
       photo: {
         type: 'quad',
         points: [[0, 1046], [1413, 652], [1413, 1481], [0, 1774]],
+        // Pita aksen (oranye/merah/dst tergantung varian) yang melintang di
+        // bagian bawah area foto — supaya TIDAK ikut tertutup foto, pita ini
+        // digambar ulang dari template asli DI ATAS foto setelah foto disisipkan.
+        accentBand: [[0, 1753], [1413, 1387], [1413, 1456], [0, 1827]],
       },
       tahun: { x: 124, y: 1850, fontSize: 48, color: COLOR_NAVY, weight: 800 },
     },
@@ -285,6 +289,17 @@
         const photoImg = await loadImageFromBlob(fotoProdukBlob);
         drawPhotoShape(ctx, photoImg, posCfg.photo);
         console.log('[CoverGenerator] foto berhasil digambar');
+
+        // Kembalikan pita aksen (yang tadinya tertutup foto) dengan
+        // menggambar ulang potongan template ASLI di atas foto, hanya
+        // di area pita itu saja.
+        if (posCfg.photo.accentBand) {
+          ctx.save();
+          clipPolygon(ctx, posCfg.photo.accentBand);
+          ctx.drawImage(bgImg, 0, 0, CANVAS_W, CANVAS_H);
+          ctx.restore();
+          console.log('[CoverGenerator] pita aksen dikembalikan di atas foto');
+        }
       } catch (e) {
         console.error('[CoverGenerator] GAGAL menggambar foto:', e);
       }
