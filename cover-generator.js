@@ -29,8 +29,9 @@
   const COLOR_BLUE = '#2838a7';
   const FONT_FAMILY = "'Poppins', sans-serif";
 
-  // Lokasi folder template — sesuaikan kalau strukturnya beda di repo LHV.
-  const TEMPLATE_BASE = 'assets/cover-templates/';
+  // Lokasi folder template — file tkdn-*.png / bmp-*.png / jasa-*.png
+  // diupload langsung ke dalam assets/ (sejajar dengan logo-*.png).
+  const TEMPLATE_BASE = 'assets/';
 
   const CATEGORIES = {
     tkdn_sendiri: { group: 'tkdn' },
