@@ -236,7 +236,7 @@ useEffect(() => {
   // STATE MENU 2: RINGKASAN EKSEKUTIF
   // ==========================================
   const [idBerkas, setIdBerkas] = useState('')
-  const [permenperin, setPermenperin] = useState('Permenperin No. 35 Tahun 2025 tentang Ketentuan dan Tata Cara Sertifikasi Tingkat Komponen Dalam Negeri dan Bobot Manfaat Perusahaan')
+  const [permenperin, setPermenperin] = useState('Peraturan Menteri Perindustrian Nomor 35 Tahun 2025 tentang Ketentuan dan Tata Cara Sertifikasi Tingkat Komponen Dalam Negeri dan Bobot Manfaat Perusahaan')
   const [alamatKantor, setAlamatKantor] = useState('')
   const [alamatPabrik, setAlamatPabrik] = useState('')
   const [skalaPerusahaan, setSkalaPerusahaan] = useState('Menengah')
@@ -296,10 +296,10 @@ useEffect(() => {
   // --- ACUAN PERATURAN ---
   const [acuanPeraturan, setAcuanPeraturan] = useState([
     { id: 1, type: 'fixed', aturan: 'Peraturan Presiden Nomor 12 Tahun 2021 tentang Perubahan atas Peraturan Presiden Nomor 16 Tahun 2018 tentang Pengadaan Barang/Jasa Pemerintah' },
-    { id: 2, type: 'dropdown', aturan: 'Permenperin No. 35 Tahun 2025 tentang Ketentuan dan Tata Cara Sertifikasi Tingkat Komponen Dalam Negeri dan Bobot Manfaat Perusahaan', options: [
-      'Permenperin No. 35 Tahun 2025 tentang Ketentuan dan Tata Cara Sertifikasi Tingkat Komponen Dalam Negeri dan Bobot Manfaat Perusahaan',
-      'Permenperin No. 31 Tahun 2022 tentang Ketentuan dan Tata Cara Penghitungan Nilai Tingkat Komponen Dalam Negeri Alat Kesehatan dan Alat Kesehatan Diagnostik In Vitro',
-      'Permenperin No. 22 Tahun 2020 tentang Ketentuan dan Tata Cara Penghitungan Nilai Tingkat Komponen Dalam Negeri Produk Elektronika dan Telematika'
+    { id: 2, type: 'dropdown', aturan: 'Peraturan Menteri Perindustrian Nomor 35 Tahun 2025 tentang Ketentuan dan Tata Cara Sertifikasi Tingkat Komponen Dalam Negeri dan Bobot Manfaat Perusahaan', options: [
+      'Peraturan Menteri Perindustrian Nomor 35 Tahun 2025 tentang Ketentuan dan Tata Cara Sertifikasi Tingkat Komponen Dalam Negeri dan Bobot Manfaat Perusahaan',
+      'Peraturan Menteri Perindustrian Nomor 31 Tahun 2022 tentang Ketentuan dan Tata Cara Penghitungan Nilai Tingkat Komponen Dalam Negeri Alat Kesehatan dan Alat Kesehatan Diagnostik In Vitro',
+      'Peraturan Menteri Perindustrian Nomor 22 Tahun 2020 tentang Ketentuan dan Tata Cara Penghitungan Nilai Tingkat Komponen Dalam Negeri Produk Elektronika dan Telematika'
     ]},
     { id: 3, type: 'fixed', aturan: 'Keputusan Menteri Perindustrian Republik Indonesia Nomor 4058 Tahun 2023 tentang Penunjukan Lembaga Verifikasi Independen Pelaksana Penghitungan dan Verifikasi Besaran Nilai TKDN dan BMP' },
     { id: 4, type: 'fixed', aturan: 'Peraturan Sekretaris Jenderal Kementerian Perindustrian Nomor 5 Tahun 2025 tentang Petunjuk Teknis Penghitungan Nilai TKDN Barang dan Jasa Industri' },
