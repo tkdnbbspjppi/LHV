@@ -1013,9 +1013,9 @@ useEffect(() => {
                 <div>
                   <label style={{ fontWeight: 'bold', fontSize: '13px' }}>2. Dasar Hukum (Permenperin):</label>
                   <select value={permenperin} onChange={handlePermenperinChange} style={inputStyle}>
-                    <option value="Permenperin No. 35 Tahun 2025 tentang Ketentuan dan Tata Cara Sertifikasi Tingkat Komponen Dalam Negeri dan Bobot Manfaat Perusahaan">Permenperin No. 35 Tahun 2025</option>
-                    <option value="Permenperin No. 31 Tahun 2022 tentang Ketentuan dan Tata Cara Penghitungan Nilai Tingkat Komponen Dalam Negeri Alat Kesehatan dan Alat Kesehatan Diagnostik In Vitro">Permenperin No. 31 Tahun 2022</option>
-                    <option value="Permenperin No. 22 Tahun 2020 tentang Ketentuan dan Tata Cara Penghitungan Nilai Tingkat Komponen Dalam Negeri Produk Elektronika dan Telematika">Permenperin No. 22 Tahun 2020</option>
+                    <option value="Peraturan Menteri Perindustrian Nomor 35 Tahun 2025 tentang Ketentuan dan Tata Cara Sertifikasi Tingkat Komponen Dalam Negeri dan Bobot Manfaat Perusahaan">Permenperin No. 35 Tahun 2025</option>
+                    <option value="Peraturan Menteri Perindustrian Nomor 31 Tahun 2022 tentang Ketentuan dan Tata Cara Penghitungan Nilai Tingkat Komponen Dalam Negeri Alat Kesehatan dan Alat Kesehatan Diagnostik In Vitro">Permenperin No. 31 Tahun 2022</option>
+                    <option value="Peraturan Menteri Perindustrian Nomor 22 Tahun 2020 tentang Ketentuan dan Tata Cara Penghitungan Nilai Tingkat Komponen Dalam Negeri Produk Elektronika dan Telematika">Permenperin No. 22 Tahun 2020</option>
                   </select>
                 </div>
                 <div><label style={{ fontWeight: 'bold', fontSize: '13px' }}>7. Tgl. Verifikasi Dokumen:</label><input type="date" value={tglVerifikasiDok} onChange={(e) => setTglVerifikasiDok(e.target.value)} style={inputStyle} /></div>
