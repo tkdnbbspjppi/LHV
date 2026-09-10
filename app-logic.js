@@ -83,6 +83,23 @@
     { stateKey: "fileFotoBarang", contextKey: "foto_barang", widthMm: 70 },
   ];
 
+  // --------------------------------------------------------------------
+  // Hitung total "unit pekerjaan" (file/gambar) yang akan diproses --
+  // dipakai sebagai penyebut untuk progress bar (persentase generate LHV).
+  // --------------------------------------------------------------------
+  function countFileItems(state) {
+    let n = 0;
+    for (const cfg of SINGLE_IMAGE_CONFIG) {
+      if (state[cfg.stateKey]) n += 1;
+    }
+    for (const cfg of CATEGORY_CONFIG) {
+      const list = state[cfg.stateKey] || [];
+      n += list.filter((item) => item && item.file).length;
+    }
+    if (state.modeRekapBahanBaku === "upload" && state.fileRekapBahanBaku) n += 1;
+    return n;
+  }
+
   let tokenCounter = 0;
   function nextToken(key) {
     tokenCounter += 1;
@@ -169,14 +186,14 @@
   // --------------------------------------------------------------------
   // Bangun { contextList, imageJobs } dari satu daftar dinamis (state list)
   // --------------------------------------------------------------------
-  async function buildDynamicList(list, widthMm, shape, imageJobs, onProgress) {
+  async function buildDynamicList(list, widthMm, shape, imageJobs, tick) {
     const result = [];
     for (const item of list || []) {
       if (!item.file) continue;
       const keterangan = shape === "formulir" ? item.judul || "" : item.keterangan || "";
 
       if (item.file.type === "application/pdf") {
-        onProgress && onProgress(`Mengekstrak halaman PDF: ${item.file.name}...`);
+        tick && tick(`Mengekstrak halaman PDF: ${item.file.name}...`);
         const pages = await extractPdfPagesAsBlobs(item.file);
         for (let idx = 0; idx < pages.length; idx++) {
           let blob = pages[idx];
@@ -187,7 +204,7 @@
           result.push({ judul: caption, keterangan: caption, gambar: token });
         }
       } else if (isExcelFile(item.file)) {
-        onProgress && onProgress(`Menggambar tabel dari Excel: ${item.file.name}...`);
+        tick && tick(`Menggambar tabel dari Excel: ${item.file.name}...`);
         let blob = await ExcelRender.renderExcelToImage(item.file);
         if (shape === "std") blob = await normalizeImageToBox(blob, 900);
         const token = nextToken("dyn");
@@ -195,8 +212,8 @@
         result.push({ judul: keterangan, keterangan: keterangan, gambar: token });
       } else {
         let blob = item.file;
+        tick && tick(`Memproses berkas: ${item.file.name || keterangan}...`);
         if (shape === "std") {
-          onProgress && onProgress(`Merapikan foto: ${item.file.name || keterangan}...`);
           blob = await normalizeImageToBox(blob, 900);
         }
         const token = nextToken("dyn");
@@ -210,7 +227,7 @@
   // --------------------------------------------------------------------
   // Bangun seluruh context + imageJobs + tableJobs dari state form React
   // --------------------------------------------------------------------
-  async function buildContext(state, onProgress) {
+  async function buildContext(state, onProgress, tick) {
     const context = {};
     const imageJobs = new Map();
     const tableJobs = new Map();
@@ -303,7 +320,7 @@
     //   - rekap_bahan_baku          : FOR-LOOP tabel biasa (TKDN & BMP) --
     //     iterasi array {nama_bahan, produsen, asal} baris per baris.
     if (state.modeRekapBahanBaku === "upload" && state.fileRekapBahanBaku) {
-      onProgress && onProgress("Memproses dokumen rekapitulasi bahan baku...");
+      tick ? tick("Memproses dokumen rekapitulasi bahan baku...") : onProgress && onProgress("Memproses dokumen rekapitulasi bahan baku...");
       let pages;
       if (state.fileRekapBahanBaku.type === "application/pdf") {
         pages = await extractPdfPagesAsBlobs(state.fileRekapBahanBaku);
@@ -351,12 +368,14 @@
       if (file) {
         let blob = file;
         if (file.type === "application/pdf") {
-          onProgress && onProgress(`Mengekstrak halaman PDF: ${file.name}...`);
+          tick && tick(`Mengekstrak halaman PDF: ${file.name}...`);
           const pages = await extractPdfPagesAsBlobs(file);
           blob = pages[0] || file;
           if (pages.length > 1) {
             console.warn(`${cfg.contextKey}: PDF punya ${pages.length} halaman, hanya halaman pertama yang dipakai (slot ini cuma menampung 1 gambar).`);
           }
+        } else {
+          tick && tick(`Memproses gambar: ${file.name || cfg.contextKey}...`);
         }
         const token = nextToken(cfg.contextKey);
         imageJobs.set(token, { blob, widthMm: cfg.widthMm });
@@ -388,7 +407,7 @@
         widthUntukKategoriIni,
         cfg.shape,
         imageJobs,
-        onProgress
+        tick
       );
     }
 
@@ -468,7 +487,30 @@
     const templatePath = TEMPLATE_MAP[state.jenisLhv];
     if (!templatePath) throw new Error(`Jenis LHV "${state.jenisLhv}" tidak dikenali.`);
 
-    onProgress && onProgress("Memuat file template...");
+    // --- Basis progress bar (persentase) ---
+    // Penyebut = jumlah file/gambar yang akan diproses (dihitung di muka)
+    // + 5 tahap tetap: 1 memuat template + 4 tahap di dalam DocxEngine
+    // (buka template, render teks, sisipkan gambar, susun ulang .docx).
+    // Ini estimasi berbobot-rata, bukan pengukuran waktu presisi -- cukup
+    // untuk menaikkan progress bar secara mulus & konsisten sampai 100%
+    // saat file benar-benar jadi.
+    const ENGINE_FIXED_STEPS = 5;
+    const totalSteps = Math.max(1, countFileItems(state) + ENGINE_FIXED_STEPS);
+    let doneSteps = 0;
+    let lastPercent = 0;
+
+    // Pesan "label" (mis. nama kategori) -- update teks status TANPA menaikkan persentase
+    const softProgress = (msg) => {
+      onProgress && onProgress(msg, lastPercent);
+    };
+    // Setiap unit pekerjaan selesai -- naikkan persentase (dibatasi 99% sampai file benar-benar selesai diunduh)
+    const tick = (msg) => {
+      doneSteps += 1;
+      lastPercent = Math.min(99, Math.round((doneSteps / totalSteps) * 100));
+      onProgress && onProgress(msg, lastPercent);
+    };
+
+    tick("Memuat file template...");
     const resp = await fetch(templatePath);
     if (!resp.ok) {
       throw new Error(
@@ -478,9 +520,9 @@
     }
     const templateArrayBuffer = await resp.arrayBuffer();
 
-    const { context, imageJobs, tableJobs } = await buildContext(state, onProgress);
+    const { context, imageJobs, tableJobs } = await buildContext(state, softProgress, tick);
 
-    const blob = await DocxEngine.generateDocx(templateArrayBuffer, context, imageJobs, tableJobs, onProgress);
+    const blob = await DocxEngine.generateDocx(templateArrayBuffer, context, imageJobs, tableJobs, tick);
 
     const filename = buildFilename(state);
     const url = URL.createObjectURL(blob);
@@ -491,6 +533,8 @@
     a.click();
     document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 5000);
+
+    onProgress && onProgress(`Selesai! File ${filename} berhasil dibuat.`, 100);
 
     return filename;
   }

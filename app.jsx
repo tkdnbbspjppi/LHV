@@ -202,6 +202,7 @@ const MIME_FORMULIR = ['image/png', 'image/jpeg', 'application/pdf', 'applicatio
 function App() {
   const [activeTab, setActiveTab] = useState(1) // Buka Menu 1
   const [status, setStatus] = useState('')
+  const [progressPercent, setProgressPercent] = useState(null) // null = tidak sedang generate; 0-100 = sedang berjalan
 
   // ==========================================
   // STATE MENU 1: DATA AWAL, COVER & LOGO
@@ -224,7 +225,7 @@ useEffect(() => {
   }
 }, [jenisLhv]);
   const [kbliDeskripsi, setKbliDeskripsi] = useState('')
-  const [namaLembagaCover, setNamaLembagaCover] = useState('LVI BSKJI - Balai Besar Standardisasi dan Pelayanan Jasa Pencegahan Pencemaran Industri')
+  const [namaLembagaCover, setNamaLembagaCover] = useState('LVI BSKJI-Balai Besar Standardisasi dan Pelayanan Jasa Pencegahan Pencemaran Industri')
   const [fileFotoCover, setFileFotoCover] = useState(null)
   const [coverPreviewUrl, setCoverPreviewUrl] = useState('')
   const [coverPreviewLoading, setCoverPreviewLoading] = useState(false)
@@ -739,6 +740,7 @@ useEffect(() => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus('Memproses data & gambar, mohon tunggu...');
+    setProgressPercent(0);
     try {
       const state = buildFullState();
 
@@ -752,7 +754,11 @@ useEffect(() => {
         }
       }
 
-      const filename = await LHVLogic.generateAndDownload(state, (msg) => { console.log('[LHV]', msg); setStatus(msg); });
+      const filename = await LHVLogic.generateAndDownload(state, (msg, percent) => {
+        console.log('[LHV]', msg, percent != null ? `(${percent}%)` : '');
+        setStatus(msg);
+        if (percent != null) setProgressPercent(percent);
+      });
 
       // Simpan proyek ini ke IndexedDB (draft tersimpan, bisa dibuka lagi nanti)
       try {
@@ -766,10 +772,13 @@ useEffect(() => {
       }
 
       setStatus('Sukses! File ' + filename + ' berhasil dibuat & diunduh. (Isian form masih tersimpan sebagai draft kalau perlu generate ulang/perbaikan.)');
+      setProgressPercent(100);
+      setTimeout(() => setProgressPercent(null), 2500);
       await saveDraft();
     } catch (err) {
       console.error(err);
       setStatus('Error: ' + (err && err.message ? err.message : String(err)) + (err && err.stack ? ('\n\n' + err.stack.split('\n').slice(0,3).join('\n')) : ''));
+      setProgressPercent(null);
     }
   }
 
@@ -819,13 +828,48 @@ useEffect(() => {
           textAlign: 'center',
           fontWeight: 'bold',
           padding: '12px 16px',
-          borderRadius: '6px',
-          margin: '0 0 15px 0',
+          borderRadius: status.startsWith('Error') ? '6px' : (progressPercent != null ? '6px 6px 0 0' : '6px'),
+          margin: '0 0 ' + (progressPercent != null && !status.startsWith('Error') ? '0' : '15px') + ' 0',
           backgroundColor: status.startsWith('Error') ? '#ffebee' : status.startsWith('Sukses') ? '#e8f5e9' : '#fff3e0',
           color: status.startsWith('Error') ? '#c62828' : status.startsWith('Sukses') ? '#2e7d32' : '#e65100',
           border: '1px solid ' + (status.startsWith('Error') ? '#ef9a9a' : status.startsWith('Sukses') ? '#a5d6a7' : '#ffcc80'),
+          borderBottom: (progressPercent != null && !status.startsWith('Error')) ? 'none' : undefined,
           whiteSpace: 'pre-wrap'
         }}>{status}</p>
+      )}
+
+      {/* PROGRESS BAR GENERATE LHV -- tampil selama proses berlangsung (0-100%) */}
+      {progressPercent != null && !status.startsWith('Error') && (
+        <div style={{ marginBottom: '15px' }}>
+          <div style={{
+            width: '100%',
+            height: '22px',
+            backgroundColor: '#fff3e0',
+            border: '1px solid #ffcc80',
+            borderTop: 'none',
+            borderRadius: '0 0 6px 6px',
+            overflow: 'hidden',
+            position: 'relative'
+          }}>
+            <div style={{
+              width: progressPercent + '%',
+              height: '100%',
+              backgroundColor: progressPercent >= 100 ? '#2e7d32' : '#1976d2',
+              transition: 'width 0.3s ease, background-color 0.3s ease',
+              borderRadius: progressPercent >= 100 ? '0 0 6px 6px' : '0'
+            }} />
+            <span style={{
+              position: 'absolute',
+              top: 0, left: 0, right: 0, bottom: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '12px', fontWeight: 'bold',
+              color: progressPercent > 50 ? '#fff' : '#333',
+              textShadow: progressPercent > 50 ? '0 1px 1px rgba(0,0,0,0.3)' : 'none'
+            }}>
+              {progressPercent}%
+            </span>
+          </div>
+        </div>
       )}
 
       {draftInfo && (
