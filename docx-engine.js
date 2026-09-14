@@ -106,6 +106,34 @@
   }
 
   // --------------------------------------------------------------------
+  // 2b. "Angkat" tag {% for %} ... {% endfor %} yang secara tidak sengaja
+  //     terjebak DI DALAM satu baris tabel (mis. {% for %} ditulis di sel
+  //     pertama, {% endfor %} di sel terakhir PADA BARIS YANG SAMA).
+  //
+  //     Kalau dibiarkan, mesin templating (nunjucks) akan mengulang teks
+  //     di ANTARA kedua tag itu apa adanya -- termasuk potongan penutup
+  //     sel & pembuka sel berikutnya -- sehingga satu <w:tr> berakhir
+  //     "digelembungi" puluhan <w:tc> ekstra untuk tiap perulangan (baris
+  //     jadi sangat tinggi & kolom berantakan/meluber ke kanan).
+  //
+  //     Perbaikannya: pindahkan tag {% for %} ke SEBELUM <w:tr> pembuka
+  //     baris tsb, dan {% endfor %} ke SESUDAH </w:tr> penutupnya --
+  //     supaya yang diulang adalah SATU BARIS PENUH & UTUH, persis
+  //     seperti cara docxtpl menangani perulangan baris tabel.
+  // --------------------------------------------------------------------
+  function hoistRowForLoops(xmlString) {
+    const ROW_LOOP_RE =
+      /(<w:tr\b[^>]*>)((?:(?!<\/?w:tr\b)[\s\S])*?)\{%-?\s*for\s+([^%]+?)-?%\}((?:(?!<\/?w:tr\b)[\s\S])*?)\{%-?\s*endfor\s*-?%\}((?:(?!<\/?w:tr\b)[\s\S])*?)(<\/w:tr>)/g;
+
+    return xmlString.replace(
+      ROW_LOOP_RE,
+      (_match, trOpen, before, forExpr, middle, after, trClose) => {
+        return `{% for ${forExpr}%}` + trOpen + before + middle + after + trClose + `{% endfor %}`;
+      }
+    );
+  }
+
+  // --------------------------------------------------------------------
   // 3. Utilitas: dapatkan ukuran natural gambar (px) dari Blob/File
   // --------------------------------------------------------------------
   function getImageNaturalSize(blob) {
@@ -259,6 +287,7 @@
       if (!partFile) continue;
       let xml = await partFile.async("string");
       xml = mergeSplitTags(xml);
+      xml = hoistRowForLoops(xml);
       let rendered;
       try {
         rendered = env.renderString(xml, context);
