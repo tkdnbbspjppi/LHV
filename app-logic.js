@@ -100,6 +100,18 @@
     return n;
   }
 
+  // --------------------------------------------------------------------
+  // Input <input type="number"> di HTML SELALU memakai titik (.) sebagai
+  // pemisah desimal -- ini standar HTML5 dan tidak mengikuti bahasa/lokasi
+  // perangkat. Fungsi ini mengubahnya jadi format Indonesia (koma) supaya
+  // yang tampil di dokumen Word konsisten dengan cara penulisan
+  // Indonesia, mis. "53.33" -> "53,33".
+  // --------------------------------------------------------------------
+  function toIndoDecimal(val) {
+    if (val === null || val === undefined) return val;
+    return String(val).trim().replace(".", ",");
+  }
+
   let tokenCounter = 0;
   function nextToken(key) {
     tokenCounter += 1;
@@ -258,7 +270,7 @@
       akta_kantor_industri: state.aktaKantorIndustri,
       npwp_kantor_industri: state.npwpKantorIndustri,
 
-      nilai_bmp: state.nilaiBmp,
+      nilai_bmp: toIndoDecimal(state.nilaiBmp),
       terbilang_bmp: state.terbilangBmp,
 
       tgl_verifikasi_dok: DocxEngine.formatTanggalIndo(state.tglVerifikasiDok),
@@ -271,10 +283,12 @@
       kode_hs: state.kodeHs,
       merek_barang: state.merekBarang,
       kelompok_barang: state.kelompokBarang,
-      nilai_tkdn: state.nilaiTkdn,
+      nilai_tkdn: toIndoDecimal(state.nilaiTkdn),
       terbilang_tkdn: state.terbilangTkdn,
-      nilai_brainware: state.nilaiBrainware,
-      terbilang_brainware: state.terbilangBrainware,
+      // Kalau Brainware tidak diisi, tampilkan "-" di dokumen (bukan kosong/blank)
+      nilai_brainware: state.nilaiBrainware ? toIndoDecimal(state.nilaiBrainware) : "-",
+      terbilang_brainware: state.nilaiBrainware ? state.terbilangBrainware : "",
+      brainware_diisi: !!state.nilaiBrainware,
       nama_verifikator: state.namaVerifikator,
       nip_verifikator: state.nipVerifikator,
       pejabat_mengetahui: state.pejabatMengetahui,
