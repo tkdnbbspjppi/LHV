@@ -548,7 +548,12 @@
     document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 5000);
 
-    onProgress && onProgress(`Selesai! File ${filename} berhasil dibuat.`, 100);
+    onProgress && onProgress(
+      blob.__leftoverTagCount
+        ? `Selesai! File ${filename} berhasil dibuat. ⚠️ Namun ditemukan ${blob.__leftoverTagCount} sisa tag template yang tidak sepenuhnya ter-render (sudah dibersihkan otomatis) -- mohon periksa kembali dokumen hasilnya, dan laporkan bagian ini kalau ada teks yang tampak janggal.`
+        : `Selesai! File ${filename} berhasil dibuat.`,
+      100
+    );
 
     return filename;
   }

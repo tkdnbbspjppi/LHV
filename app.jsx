@@ -225,7 +225,7 @@ useEffect(() => {
   }
 }, [jenisLhv]);
   const [kbliDeskripsi, setKbliDeskripsi] = useState('')
-  const [namaLembagaCover, setNamaLembagaCover] = useState('LVI BSKJI-Balai Besar Standardisasi dan Pelayanan Jasa Pencegahan Pencemaran Industri')
+  const [namaLembagaCover, setNamaLembagaCover] = useState('LVI BSKJI - Balai Besar Standardisasi dan Pelayanan Jasa Pencegahan Pencemaran Industri')
   const [fileFotoCover, setFileFotoCover] = useState(null)
   const [coverPreviewUrl, setCoverPreviewUrl] = useState('')
   const [coverPreviewLoading, setCoverPreviewLoading] = useState(false)
@@ -307,8 +307,8 @@ useEffect(() => {
     { id: 5, type: 'fixed', aturan: 'Keputusan Kepala Badan Standardisasi dan Kebijakan Jasa Industri Tahun 2026 tentang Pedoman Penyelenggaraan Layanan Penghitungan dan Verifikasi Nilai Tingkat Komponen Dalam Negeri dan Bobot Manfaat Perusahaan di Lingkungan Badan Standardisasi dan Kebijakan Jasa Industri' },
     { id: 6, type: 'dropdown', aturan: 'Peraturan Direktur Jenderal Industri Logam, Mesin, Alat Transportasi dan Elektronika Nomor 6 Tahun 2025 tentang Rincian Komponen Utama Barang Sektor Industri Logam, Mesin, Alat Transportasi dan Elektronika untuk Penghitungan Nilai Tingkat Komponen Dalam Negeri', options: [
       'Peraturan Direktur Jenderal Industri Logam, Mesin, Alat Transportasi dan Elektronika Kementerian Perindustrian Nomor 2 Tahun 2026 tentang Perubahan atas Peraturan Direahuan Dirjen ILMATE Nomor 6 Tahun 2025 tentang Rincian Komponen Utama Barang Sektor Industri Logam, Mesin, Alat Transportasi dan Elektronika untuk Penghitungan Nilai Tingkat Komponen Dalam Negeri',
-      'Peraturan Direktur Jenderal Industri Kecil, Menengah, dan Aneka Nomor 186 Tahun 2026 tentang Perubahan Kedua atas Peraturan Direktur Jenderal Industri Kecil, Menengah, dan Aneka Nomor 263 Tahun 2025 tentang Rincian Komponen Utama Barang Sektor IKMA untuk Penghitungan TKDN',
-      'Peraturan Direktur Jenderal Industri Kimia, Farmasi dan Tekstil Nomor 13 Tahun 2026 tentang Perubahan Keuda atas Peraturan Direktur Jenderal Industri Kimia, Farmasi dan Tekstil Nomor 1 Tahun 2025 tentang Rincian Komponen Utama Barang Sektor IKFT untuk Penghitungan Nilai TKDN',
+      'Peraturan Direktur Jenderal Industri Kecil, Menengah, dan Aneka Nomor 113 Tahun 2026 tentang Perubahan atas Peraturan Direktur Jenderal Industri Kecil, Menengah, dan Aneka Nomor 263 Tahun 2025 tentang Rincian Komponen Utama Barang Sektor IKMA untuk Penghitungan TKDN',
+      'Peraturan Direktur Jenderal Industri Kimia, Farmasi dan Tekstil Nomor 8 Tahun 2026 tentang Perubahan atas Peraturan Direktur Jenderal Industri Kimia, Farmasi dan Tekstil Nomor 1 Tahun 2025 tentang Rincian Komponen Utama Barang Sektor IKFT untuk Penghitungan Nilai TKDN',
       'Peraturan Direktur Jenderal Industri Agro Nomor 2 Tahun 2026 tentang Perubahan atas Peraturan Direktur Jenderal Industri Agro Nomor 1 Tahun 2025 tentang Rincian Komponen Utama Barang Sektor Agro untuk Penghitungan Nilai TKDN'
     ]}
   ])

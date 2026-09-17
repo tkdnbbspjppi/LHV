@@ -274,6 +274,7 @@
 
   async function generateDocx(templateArrayBuffer, context, imageJobs, tableJobs, onProgress) {
     const report = (msg) => onProgress && onProgress(msg);
+    let leftoverTagCount = 0; // jaring pengaman -- lihat catatan di bawah
 
     report("Membuka template...");
     const zip = await JSZip.loadAsync(templateArrayBuffer);
@@ -293,6 +294,27 @@
         rendered = env.renderString(xml, context);
       } catch (e) {
         throw new Error(`Gagal merender ${partPath} (periksa sintaks tag di file Word): ${e.message}`);
+      }
+
+      // ----------------------------------------------------------------
+      // JARING PENGAMAN: setelah nunjucks selesai merender, seharusnya
+      // TIDAK ADA LAGI teks mentah "{{", "}}", "{%", "%}" yang tersisa --
+      // semuanya semestinya sudah terganti oleh isi datanya. Kalau masih
+      // ada (mis. karena template punya tag yang rusak/tidak seimbang),
+      // itu SELALU berarti bug, dan membiarkannya lolos ke dokumen akhir
+      // (mis. muncul sebagai "}}" atau "%}" nyasar di hasil cetak) jauh
+      // lebih buruk daripada menghapusnya di sini -- jadi kita bersihkan
+      // otomatis, sambil tetap mencatat supaya kelihatan di log/status.
+      // ----------------------------------------------------------------
+      const leftover = rendered.match(/\{\{|\}\}|\{%|%\}/g);
+      if (leftover && leftover.length) {
+        leftoverTagCount += leftover.length;
+        console.warn(
+          `[LHV] Ditemukan ${leftover.length} sisa tag template ("${leftover.join(
+            '", "'
+          )}") yang belum sepenuhnya ter-render di ${partPath} -- dihapus otomatis. Sebaiknya periksa template Word untuk tag yang rusak/tidak seimbang.`
+        );
+        rendered = rendered.replace(/\{\{|\}\}|\{%|%\}/g, "");
       }
 
       // ---------------- Sisipkan tabel (mis. rekap bahan baku) ----------------
@@ -429,6 +451,10 @@
       type: "blob",
       mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     });
+    // Ditempel sebagai properti tambahan (bukan mengubah bentuk return blob)
+    // supaya app-logic.js bisa memberi tahu pengguna kalau ada sisa tag yang
+    // sempat kebersihkan otomatis -- tanpa perlu mengubah signature fungsi ini.
+    blob.__leftoverTagCount = leftoverTagCount;
     return blob;
   }
 
