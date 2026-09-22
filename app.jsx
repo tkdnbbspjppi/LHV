@@ -376,6 +376,7 @@ useEffect(() => {
   // STATE MENU 5: LAMPIRAN
   // ==========================================
   const [fileDokumenPengembangan, setFileDokumenPengembangan] = useState([{ id: 100, file: null, keterangan: 'Dokumen Pengembangan' }])
+  const [fileAktaPendirian, setFileAktaPendirian] = useState([{ id: 121, file: null, keterangan: 'Akta Pendirian/Perubahan Terakhir' }])
   const [fileNibRba, setFileNibRba] = useState([{ id: 101, file: null, keterangan: 'NIB RBA' }])
   const [fileSertifikatStandar, setFileSertifikatStandar] = useState([{ id: 102, file: null, keterangan: 'Sertifikat Standar' }])
   const [fileIzinUsaha, setFileIzinUsaha] = useState([{ id: 103, file: null, keterangan: 'Izin Usaha' }])
@@ -512,6 +513,7 @@ useEffect(() => {
     fileAwardsBmp: setFileAwardsBmp,
     fileSiinasBmp: setFileSiinasBmp,
     fileDokumenPengembangan: setFileDokumenPengembangan,
+    fileAktaPendirian: setFileAktaPendirian,
     fileNibRba: setFileNibRba,
     fileSertifikatStandar: setFileSertifikatStandar,
     fileIzinUsaha: setFileIzinUsaha,
@@ -568,7 +570,7 @@ useEffect(() => {
     fileMesinDnBmp, fileLokasiBmp, fileI40Bmp, fileSdmBmp, fileSertifikatBmp,
     fileHijauBmp, fileEksporBmp, fileMerekDnBmp, fileEsgBmp, fileAwardsBmp,
     fileSiinasBmp,
-    fileDokumenPengembangan, fileNibRba, fileSertifikatStandar, fileIzinUsaha, fileNpwpLampiran,
+    fileDokumenPengembangan, fileAktaPendirian, fileNibRba, fileSertifikatStandar, fileIzinUsaha, fileNpwpLampiran,
     fileSertifikatMerek, fileSertifikatProduk, fileNie, fileBpom,
     fileFotoProduk, fileFotoBahanBaku, fileInvoiceBahanBaku,
     fileAlurProsesLampiran, fileDaftarGaji, fileSampelKtp, fileStrukturPabrik,
@@ -1482,17 +1484,18 @@ useEffect(() => {
             {renderDynamicBlock("Dokumen Pengembangan", fileDokumenPengembangan, setFileDokumenPengembangan)}
 
             <h4 style={{ backgroundColor: '#e3f2fd', padding: '10px', borderRadius: '4px', color: '#0d47a1' }}>1. Legalitas Perusahaan</h4>
-            {renderDynamicBlock("a. NIB RBA", fileNibRba, setFileNibRba)}
-            {renderDynamicBlock("b. Sertifikat Standar", fileSertifikatStandar, setFileSertifikatStandar)}
-            {renderDynamicBlock("c. Surat Izin Operasional / IZIN", fileIzinUsaha, setFileIzinUsaha)}
-            {renderDynamicBlock("d. NPWP Perusahaan", fileNpwpLampiran, setFileNpwpLampiran)}
+            {renderDynamicBlock("a. Akta Pendirian/Perubahan Terakhir", fileAktaPendirian, setFileAktaPendirian)}
+            {renderDynamicBlock("b. NIB RBA", fileNibRba, setFileNibRba)}
+            {renderDynamicBlock("c. Sertifikat Standar", fileSertifikatStandar, setFileSertifikatStandar)}
+            {renderDynamicBlock("d. Surat Izin Operasional / IZIN", fileIzinUsaha, setFileIzinUsaha)}
+            {renderDynamicBlock("e. NPWP Perusahaan", fileNpwpLampiran, setFileNpwpLampiran)}
             
             {jenisLhv !== 'BMP' && (
               <>
-                {renderDynamicBlock("e. Sertifikat Merek", fileSertifikatMerek, setFileSertifikatMerek)}
-                {renderDynamicBlock("f. Sertifikat Produk", fileSertifikatProduk, setFileSertifikatProduk)}
-                {renderDynamicBlock("g. NIE", fileNie, setFileNie)}
-                {renderDynamicBlock("h. BPOM", fileBpom, setFileBpom)}
+                {renderDynamicBlock("f. Sertifikat Merek", fileSertifikatMerek, setFileSertifikatMerek)}
+                {renderDynamicBlock("g. Sertifikat Produk", fileSertifikatProduk, setFileSertifikatProduk)}
+                {renderDynamicBlock("h. NIE", fileNie, setFileNie)}
+                {renderDynamicBlock("i. BPOM", fileBpom, setFileBpom)}
               </>
             )}
 
