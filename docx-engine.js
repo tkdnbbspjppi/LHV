@@ -134,6 +134,32 @@
   }
 
   // --------------------------------------------------------------------
+  // 2c. Perbaiki nama variabel tag yang RUSAK SECARA SINTAKS Jinja2/nunjucks.
+  //
+  //     Template BMP memakai nama variabel "industri_4.0" (mengandung titik)
+  //     untuk kategori "Bukti Penerapan Industri 4.0". Masalahnya: di
+  //     Jinja2/nunjucks, titik SELALU berarti akses atribut (mis. "a.b"
+  //     dibaca "atribut b dari a") -- sehingga "industri_4.0" TIDAK PERNAH
+  //     bisa diparse sebagai satu nama variabel utuh. nunjucks bahkan gagal
+  //     di tahap PARSING (bukan cuma render) dengan error "expected name as
+  //     lookup value, got 0". Ini murni batasan sintaks mesin templating,
+  //     jadi TIDAK BISA diakali lewat context (mis. context["industri_4"] =
+  //     [...] supaya "industri_4.0" berarti index ke-0) -- akan tetap gagal
+  //     di parsing sebelum sempat dievaluasi.
+  //
+  //     Satu-satunya perbaikan: ganti nama variabel tsb jadi nama yang sah
+  //     secara sintaks, "industri_4_0" -- TAPI HANYA di dalam tag
+  //     {{ }} / {% %}, supaya teks body lain (kalau ada kata "industri_4.0"
+  //     tertulis apa adanya di dokumen) tidak ikut kena ganti. contextKey
+  //     yang dipakai di app-logic.js (CATEGORY_CONFIG) untuk kategori ini
+  //     HARUS "industri_4_0" juga, supaya konsisten dengan penggantian ini.
+  // --------------------------------------------------------------------
+  function sanitizeBrokenTagNames(xmlString) {
+    const tagRegex = /\{\{[\s\S]*?\}\}|\{%[\s\S]*?%\}/g;
+    return xmlString.replace(tagRegex, (tag) => tag.split("industri_4.0").join("industri_4_0"));
+  }
+
+  // --------------------------------------------------------------------
   // 3. Utilitas: dapatkan ukuran natural gambar (px) dari Blob/File
   // --------------------------------------------------------------------
   function getImageNaturalSize(blob) {
@@ -288,6 +314,7 @@
       if (!partFile) continue;
       let xml = await partFile.async("string");
       xml = mergeSplitTags(xml);
+      xml = sanitizeBrokenTagNames(xml);
       xml = hoistRowForLoops(xml);
       let rendered;
       try {

@@ -33,21 +33,36 @@
     { stateKey: "fileKtp", contextKey: "ktp_karyawan", widthMm: 70, shape: "std" },
     { stateKey: "fileBuktiKerjasama", contextKey: "bukti_kerjasama", widthMm: 70, shape: "std" },
 
-    { stateKey: "fileTenagaKerjaBmp", contextKey: "bmp_tenagakerja", widthMm: 70, shape: "std" },
-    { stateKey: "fileInvestasiBmp", contextKey: "bmp_investasi", widthMm: 70, shape: "std" },
-    { stateKey: "fileKemitraanBmp", contextKey: "bmp_kemitraan", widthMm: 70, shape: "std" },
-    { stateKey: "fileSubstitusiBmp", contextKey: "bmp_substitusi", widthMm: 70, shape: "std" },
-    { stateKey: "fileMesinDnBmp", contextKey: "bmp_mesindn", widthMm: 70, shape: "std" },
-    { stateKey: "fileLokasiBmp", contextKey: "bmp_lokasi", widthMm: 70, shape: "std" },
-    { stateKey: "fileI40Bmp", contextKey: "bmp_industri40", widthMm: 70, shape: "std" },
-    { stateKey: "fileSdmBmp", contextKey: "bmp_sdm", widthMm: 70, shape: "std" },
-    { stateKey: "fileSertifikatBmp", contextKey: "bmp_sertifikat", widthMm: 70, shape: "std" },
-    { stateKey: "fileHijauBmp", contextKey: "bmp_hijau", widthMm: 70, shape: "std" },
-    { stateKey: "fileEksporBmp", contextKey: "bmp_ekspor", widthMm: 70, shape: "std" },
-    { stateKey: "fileMerekDnBmp", contextKey: "bmp_merekdn", widthMm: 70, shape: "std" },
-    { stateKey: "fileEsgBmp", contextKey: "bmp_esg", widthMm: 70, shape: "std" },
-    { stateKey: "fileAwardsBmp", contextKey: "bmp_awards", widthMm: 70, shape: "std" },
-    { stateKey: "fileSiinasBmp", contextKey: "bmp_siinas", widthMm: 70, shape: "std" },
+    // --------------------------------------------------------------------
+    // contextKey di bawah ini DISESUAIKAN PERSIS dengan nama tag Jinja2 di
+    // dalam Template_LHV_BMP.docx (mis. "{% for baris in penyerapan_tenaga_kerja
+    // | batch(2, None) %}"). Sebelumnya contextKey memakai nama lama
+    // ("bmp_tenagakerja" dst.) yang TIDAK COCOK dengan tag apa pun di
+    // template ini, sehingga semua bagian bukti pendukung BMP tampil
+    // kosong di dokumen hasil generate.
+    //
+    // Catatan khusus "industri_4_0": di template tag-nya tertulis
+    // "industri_4.0" (pakai titik), TAPI titik di Jinja2/nunjucks selalu
+    // berarti akses atribut sehingga nama itu tidak valid secara sintaks
+    // (nunjucks gagal parse). docx-engine.js (sanitizeBrokenTagNames)
+    // otomatis mengganti tag tsb jadi "industri_4_0" sebelum dirender --
+    // contextKey di sini HARUS "industri_4_0" juga supaya cocok.
+    // --------------------------------------------------------------------
+    { stateKey: "fileTenagaKerjaBmp", contextKey: "penyerapan_tenaga_kerja", widthMm: 70, shape: "std" },
+    { stateKey: "fileInvestasiBmp", contextKey: "investasi_baru", widthMm: 70, shape: "std" },
+    { stateKey: "fileKemitraanBmp", contextKey: "kemitraan_rantai", widthMm: 70, shape: "std" },
+    { stateKey: "fileSubstitusiBmp", contextKey: "pionir_substitusi", widthMm: 70, shape: "std" },
+    { stateKey: "fileMesinDnBmp", contextKey: "mesin_peralatan", widthMm: 70, shape: "std" },
+    { stateKey: "fileLokasiBmp", contextKey: "lokasi_produksi", widthMm: 70, shape: "std" },
+    { stateKey: "fileI40Bmp", contextKey: "industri_4_0", widthMm: 70, shape: "std" },
+    { stateKey: "fileSdmBmp", contextKey: "pengembangan_SDM", widthMm: 70, shape: "std" },
+    { stateKey: "fileSertifikatBmp", contextKey: "sertifikat_akreditasi", widthMm: 70, shape: "std" },
+    { stateKey: "fileHijauBmp", contextKey: "industri_hijau", widthMm: 70, shape: "std" },
+    { stateKey: "fileEksporBmp", contextKey: "nilai_ekspor", widthMm: 70, shape: "std" },
+    { stateKey: "fileMerekDnBmp", contextKey: "produk_dalam_negeri", widthMm: 70, shape: "std" },
+    { stateKey: "fileEsgBmp", contextKey: "penerapan_esg", widthMm: 70, shape: "std" },
+    { stateKey: "fileAwardsBmp", contextKey: "penghargaan_awards", widthMm: 70, shape: "std" },
+    { stateKey: "fileSiinasBmp", contextKey: "pelaporan_siinas", widthMm: 70, shape: "std" },
 
     { stateKey: "fileDokumenPengembangan", contextKey: "dokumen_pengembangan", widthMm: 70, shape: "std" },
     { stateKey: "fileAktaPendirian", contextKey: "akta_pendirian_terakhir", widthMm: 70, shape: "std" },

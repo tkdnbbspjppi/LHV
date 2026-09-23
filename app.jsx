@@ -1299,6 +1299,14 @@ useEffect(() => {
             {jenisLhv === 'BMP' ? (
               <>
                 <p style={{fontSize:'13px', color:'#666', marginTop:'-10px', marginBottom:'20px'}}>* Silakan unggah bukti administrasi pendukung untuk setiap aspek indikator penilaian BMP berikut (Format dapat berupa Gambar maupun PDF).</p>
+                <div style={{ marginBottom: '15px', padding: '10px', backgroundColor: '#e3f2fd', borderRadius: '4px' }}>
+                  <label style={{ fontWeight: 'bold', fontSize: '13px' }}>Struktur Organisasi Perusahaan (Gambar):</label>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '5px' }}>
+                    <input type="file" accept="image/png, image/jpeg, application/pdf" onChange={(e) => setFileStruktur(e.target.files[0])} style={{ flex: 1 }} />
+                    <GDriveButton mimeTypes={MIME_DOKUMEN} onFile={setFileStruktur} />
+                  </div>
+                  <ImagePreview file={fileStruktur} targetWidth="7 cm" />
+                </div>
                 {aspekBmp.find(a => a.id === 2)?.checked && renderDynamicBlock("1. Bukti Penyerapan Tenaga Kerja", fileTenagaKerjaBmp, setFileTenagaKerjaBmp)}
                 {aspekBmp.find(a => a.id === 3)?.checked && renderDynamicBlock("2. Bukti Penambahan Investasi Baru", fileInvestasiBmp, setFileInvestasiBmp)}
                 {aspekBmp.find(a => a.id === 4)?.checked && renderDynamicBlock("3. Bukti Kemitraan dan Penguatan Rantai Pasok", fileKemitraanBmp, setFileKemitraanBmp)}
@@ -1490,14 +1498,11 @@ useEffect(() => {
             {renderDynamicBlock("d. Surat Izin Operasional / IZIN", fileIzinUsaha, setFileIzinUsaha)}
             {renderDynamicBlock("e. NPWP Perusahaan", fileNpwpLampiran, setFileNpwpLampiran)}
             
-            {jenisLhv !== 'BMP' && (
-              <>
-                {renderDynamicBlock("f. Sertifikat Merek", fileSertifikatMerek, setFileSertifikatMerek)}
-                {renderDynamicBlock("g. Sertifikat Produk", fileSertifikatProduk, setFileSertifikatProduk)}
-                {renderDynamicBlock("h. NIE", fileNie, setFileNie)}
-                {renderDynamicBlock("i. BPOM", fileBpom, setFileBpom)}
-              </>
-            )}
+            {/* Dipakai semua skema termasuk BMP -- template BMP juga punya tag sert_merek/sert_produk/nie/bpom */}
+            {renderDynamicBlock("f. Sertifikat Merek", fileSertifikatMerek, setFileSertifikatMerek)}
+            {renderDynamicBlock("g. Sertifikat Produk", fileSertifikatProduk, setFileSertifikatProduk)}
+            {renderDynamicBlock("h. NIE", fileNie, setFileNie)}
+            {renderDynamicBlock("i. BPOM", fileBpom, setFileBpom)}
 
             <h4 style={{ backgroundColor: '#e3f2fd', padding: '10px', borderRadius: '4px', color: '#0d47a1', marginTop: '30px' }}>2. Foto Produk & Lampiran Teknis</h4>
             {renderDynamicBlock("a. Foto Produk Akhir", fileFotoProduk, setFileFotoProduk)}
