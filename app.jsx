@@ -1299,6 +1299,51 @@ useEffect(() => {
             {jenisLhv === 'BMP' ? (
               <>
                 <p style={{fontSize:'13px', color:'#666', marginTop:'-10px', marginBottom:'20px'}}>* Silakan unggah bukti administrasi pendukung untuk setiap aspek indikator penilaian BMP berikut (Format dapat berupa Gambar maupun PDF).</p>
+
+                <div style={sectionStyle}>
+                  <h4 style={sectionTitle}>1.a. Profil Perusahaan (Kantor)</h4>
+                  <div style={grid2Col}>
+                    <div><label style={{ fontWeight: 'bold', fontSize: '13px' }}>Nama Perusahaan:</label><input type="text" value={namaPerusahaan} readOnly style={readOnlyStyle} /></div>
+                    <div><label style={{ fontWeight: 'bold', fontSize: '13px' }}>Status Perusahaan:</label>
+                      <select value={statusKantor} onChange={(e) => setStatusKantor(e.target.value)} style={inputStyle}><option value="PMDN">PMDN</option><option value="PMA">PMA</option></select>
+                    </div>
+                    <div style={{ gridColumn: '1 / -1' }}><label style={{ fontWeight: 'bold', fontSize: '13px' }}>Alamat Kantor:</label><textarea rows="2" value={alamatKantor} onChange={(e) => setAlamatKantor(e.target.value)} style={inputStyle}></textarea></div>
+                    <div><label style={{ fontWeight: 'bold', fontSize: '13px' }}>Telepon:</label><input type="text" value={teleponKantor} onChange={(e) => setTeleponKantor(e.target.value)} style={inputStyle} /></div>
+                    <div><label style={{ fontWeight: 'bold', fontSize: '13px' }}>Fax:</label><input type="text" value={faxKantor} onChange={(e) => setFaxKantor(e.target.value)} style={inputStyle} /></div>
+                    <div><label style={{ fontWeight: 'bold', fontSize: '13px' }}>Email:</label><input type="email" value={emailKantor} onChange={(e) => setEmailKantor(e.target.value)} style={inputStyle} /></div>
+                    <div><label style={{ fontWeight: 'bold', fontSize: '13px' }}>Website:</label><input type="text" value={websiteKantor} onChange={(e) => setWebsiteKantor(e.target.value)} style={inputStyle} /></div>
+                    <div style={{ gridColumn: '1 / -1' }}><label style={{ fontWeight: 'bold', fontSize: '13px' }}>Narahubung (PIC):</label><input type="text" value={picKantor} onChange={(e) => setPicKantor(e.target.value)} style={inputStyle} /></div>
+                    <div style={{ gridColumn: '1 / -1' }}><label style={{ fontWeight: 'bold', fontSize: '13px' }}>Akta Pendirian/Perusahaan:</label><textarea rows="2" value={aktaKantor} onChange={(e) => setAktaKantor(e.target.value)} style={inputStyle}></textarea></div>
+                    <div><label style={{ fontWeight: 'bold', fontSize: '13px' }}>NPWP:</label><input type="text" value={npwpKantor} onChange={(e) => setNpwpKantor(e.target.value)} style={inputStyle} /></div>
+                    <div><label style={{ fontWeight: 'bold', fontSize: '13px' }}>IUI / NIB:</label><input type="text" value={noIzin} onChange={(e) => setNoIzin(e.target.value)} style={inputStyle} /></div>
+                  </div>
+                </div>
+
+                <div style={sectionStyle}>
+                  <h4 style={{ ...sectionTitle, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                    <span>1.b. Profil Perusahaan (Pabrik)</span>
+                    <label style={{ fontSize: '13px', fontWeight: 'normal', color: '#1565c0', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', backgroundColor: '#e3f2fd', padding: '5px 10px', borderRadius: '4px', border: '1px solid #90caf9' }}>
+                      <input type="checkbox" checked={samaDenganKantor} onChange={(e) => setSamaDenganKantor(e.target.checked)} style={{ transform: 'scale(1.2)' }} />
+                      <b>Data pabrik sama dengan data kantor</b>
+                    </label>
+                  </h4>
+                  <div style={grid2Col}>
+                    <div><label style={{ fontWeight: 'bold', fontSize: '13px' }}>Nama Perusahaan:</label><input type="text" value={namaPerusahaan} readOnly style={readOnlyStyle} /></div>
+                    <div><label style={{ fontWeight: 'bold', fontSize: '13px' }}>Status Perusahaan:</label>
+                      <select value={statusPabrik} onChange={(e) => setStatusPabrik(e.target.value)} disabled={samaDenganKantor} style={samaDenganKantor ? readOnlyStyle : inputStyle}><option value="PMDN">PMDN</option><option value="PMA">PMA</option></select>
+                    </div>
+                    <div style={{ gridColumn: '1 / -1' }}><label style={{ fontWeight: 'bold', fontSize: '13px' }}>Alamat Pabrik:</label><textarea rows="2" value={alamatPabrik} onChange={(e) => setAlamatPabrik(e.target.value)} readOnly={samaDenganKantor} style={samaDenganKantor ? readOnlyStyle : inputStyle}></textarea></div>
+                    <div><label style={{ fontWeight: 'bold', fontSize: '13px' }}>Telepon:</label><input type="text" value={teleponPabrik} onChange={(e) => setTeleponPabrik(e.target.value)} readOnly={samaDenganKantor} style={samaDenganKantor ? readOnlyStyle : inputStyle} /></div>
+                    <div><label style={{ fontWeight: 'bold', fontSize: '13px' }}>Fax:</label><input type="text" value={faxPabrik} onChange={(e) => setFaxPabrik(e.target.value)} readOnly={samaDenganKantor} style={samaDenganKantor ? readOnlyStyle : inputStyle} /></div>
+                    <div><label style={{ fontWeight: 'bold', fontSize: '13px' }}>Email:</label><input type="email" value={emailPabrik} onChange={(e) => setEmailPabrik(e.target.value)} readOnly={samaDenganKantor} style={samaDenganKantor ? readOnlyStyle : inputStyle} /></div>
+                    <div><label style={{ fontWeight: 'bold', fontSize: '13px' }}>Website:</label><input type="text" value={websitePabrik} onChange={(e) => setWebsitePabrik(e.target.value)} readOnly={samaDenganKantor} style={samaDenganKantor ? readOnlyStyle : inputStyle} /></div>
+                    <div style={{ gridColumn: '1 / -1' }}><label style={{ fontWeight: 'bold', fontSize: '13px' }}>Narahubung (PIC):</label><input type="text" value={picPabrik} onChange={(e) => setPicPabrik(e.target.value)} readOnly={samaDenganKantor} style={samaDenganKantor ? readOnlyStyle : inputStyle} /></div>
+                    <div style={{ gridColumn: '1 / -1' }}><label style={{ fontWeight: 'bold', fontSize: '13px' }}>Akta Pendirian/Perusahaan:</label><textarea rows="2" value={aktaPabrik} onChange={(e) => setAktaPabrik(e.target.value)} readOnly={samaDenganKantor} style={samaDenganKantor ? readOnlyStyle : inputStyle}></textarea></div>
+                    <div><label style={{ fontWeight: 'bold', fontSize: '13px' }}>NPWP:</label><input type="text" value={npwpPabrik} onChange={(e) => setNpwpPabrik(e.target.value)} readOnly={samaDenganKantor} style={samaDenganKantor ? readOnlyStyle : inputStyle} /></div>
+                    <div><label style={{ fontWeight: 'bold', fontSize: '13px' }}>IUI / NIB:</label><input type="text" value={noIzin} onChange={(e) => setNoIzin(e.target.value)} style={inputStyle} /></div>
+                  </div>
+                </div>
+
                 <div style={{ marginBottom: '15px', padding: '10px', backgroundColor: '#e3f2fd', borderRadius: '4px' }}>
                   <label style={{ fontWeight: 'bold', fontSize: '13px' }}>Struktur Organisasi Perusahaan (Gambar):</label>
                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '5px' }}>
