@@ -24,14 +24,22 @@
   // Kategori gambar dinamis: { stateKey, category, contextKey, widthMm, shape }
   // shape 'std'      -> item = { id, file, keterangan }
   // shape 'formulir' -> item = { id, file, judul }
+  //
+  // "noDataLabel": kalau kategori ini TIDAK ADA berkas yang diunggah sama
+  // sekali, buildContext() otomatis mengisi 1 baris placeholder berbunyi
+  // "Tidak ada <noDataLabel>." menggantikan baris kosong -- supaya struktur
+  // LHV yang tergenerate tetap mengikuti urutan template, dan bagian yang
+  // memang tidak dimiliki perusahaan diberi keterangan eksplisit (bukan
+  // dibiarkan kosong begitu saja). Berlaku untuk skema TKDN maupun BMP,
+  // karena ini logika di lapisan data (buildContext), bukan per-template.
   const CATEGORY_CONFIG = [
     { stateKey: "formulirVerifikasi", contextKey: "formulir_tkdn", widthMm: null, shape: "formulir" },
-    { stateKey: "fileBuktiPabrik", contextKey: "bukti_pabrik", widthMm: 70, shape: "std" },
-    { stateKey: "fileBom", contextKey: "gambar_bom", widthMm: 70, shape: "std" },
-    { stateKey: "fileSertifikatTkdn", contextKey: "sertifikat_tkdn", widthMm: 70, shape: "std" },
-    { stateKey: "fileBuktiBeli", contextKey: "bukti_beli", widthMm: 70, shape: "std" },
-    { stateKey: "fileKtp", contextKey: "ktp_karyawan", widthMm: 70, shape: "std" },
-    { stateKey: "fileBuktiKerjasama", contextKey: "bukti_kerjasama", widthMm: 70, shape: "std" },
+    { stateKey: "fileBuktiPabrik", contextKey: "bukti_pabrik", widthMm: 70, shape: "std", noDataLabel: "bukti kepemilikan pabrik / fasilitas produksi" },
+    { stateKey: "fileBom", contextKey: "gambar_bom", widthMm: 70, shape: "std", noDataLabel: "data rincian BoM / gambar teknik" },
+    { stateKey: "fileSertifikatTkdn", contextKey: "sertifikat_tkdn", widthMm: 70, shape: "std", noDataLabel: "sertifikat TKDN komponen utama" },
+    { stateKey: "fileBuktiBeli", contextKey: "bukti_beli", widthMm: 70, shape: "std", noDataLabel: "bukti pembelian komponen utama" },
+    { stateKey: "fileKtp", contextKey: "ktp_karyawan", widthMm: 70, shape: "std", noDataLabel: "kartu identitas kewarganegaraan (KTP)" },
+    { stateKey: "fileBuktiKerjasama", contextKey: "bukti_kerjasama", widthMm: 70, shape: "std", noDataLabel: "bukti kerja sama" },
 
     // --------------------------------------------------------------------
     // contextKey di bawah ini DISESUAIKAN PERSIS dengan nama tag Jinja2 di
@@ -48,44 +56,44 @@
     // otomatis mengganti tag tsb jadi "industri_4_0" sebelum dirender --
     // contextKey di sini HARUS "industri_4_0" juga supaya cocok.
     // --------------------------------------------------------------------
-    { stateKey: "fileTenagaKerjaBmp", contextKey: "penyerapan_tenaga_kerja", widthMm: 70, shape: "std" },
-    { stateKey: "fileInvestasiBmp", contextKey: "investasi_baru", widthMm: 70, shape: "std" },
-    { stateKey: "fileKemitraanBmp", contextKey: "kemitraan_rantai", widthMm: 70, shape: "std" },
-    { stateKey: "fileSubstitusiBmp", contextKey: "pionir_substitusi", widthMm: 70, shape: "std" },
-    { stateKey: "fileMesinDnBmp", contextKey: "mesin_peralatan", widthMm: 70, shape: "std" },
-    { stateKey: "fileLokasiBmp", contextKey: "lokasi_produksi", widthMm: 70, shape: "std" },
-    { stateKey: "fileI40Bmp", contextKey: "industri_4_0", widthMm: 70, shape: "std" },
-    { stateKey: "fileSdmBmp", contextKey: "pengembangan_SDM", widthMm: 70, shape: "std" },
-    { stateKey: "fileSertifikatBmp", contextKey: "sertifikat_akreditasi", widthMm: 70, shape: "std" },
-    { stateKey: "fileHijauBmp", contextKey: "industri_hijau", widthMm: 70, shape: "std" },
-    { stateKey: "fileEksporBmp", contextKey: "nilai_ekspor", widthMm: 70, shape: "std" },
-    { stateKey: "fileMerekDnBmp", contextKey: "produk_dalam_negeri", widthMm: 70, shape: "std" },
-    { stateKey: "fileEsgBmp", contextKey: "penerapan_esg", widthMm: 70, shape: "std" },
-    { stateKey: "fileAwardsBmp", contextKey: "penghargaan_awards", widthMm: 70, shape: "std" },
-    { stateKey: "fileSiinasBmp", contextKey: "pelaporan_siinas", widthMm: 70, shape: "std" },
+    { stateKey: "fileTenagaKerjaBmp", contextKey: "penyerapan_tenaga_kerja", widthMm: 70, shape: "std", noDataLabel: "bukti penyerapan tenaga kerja" },
+    { stateKey: "fileInvestasiBmp", contextKey: "investasi_baru", widthMm: 70, shape: "std", noDataLabel: "bukti penambahan investasi baru" },
+    { stateKey: "fileKemitraanBmp", contextKey: "kemitraan_rantai", widthMm: 70, shape: "std", noDataLabel: "bukti kemitraan dan penguatan rantai pasok" },
+    { stateKey: "fileSubstitusiBmp", contextKey: "pionir_substitusi", widthMm: 70, shape: "std", noDataLabel: "bukti industri pionir atau substitusi impor" },
+    { stateKey: "fileMesinDnBmp", contextKey: "mesin_peralatan", widthMm: 70, shape: "std", noDataLabel: "bukti penggunaan mesin & peralatan produksi dalam negeri" },
+    { stateKey: "fileLokasiBmp", contextKey: "lokasi_produksi", widthMm: 70, shape: "std", noDataLabel: "bukti lokasi pembuatan" },
+    { stateKey: "fileI40Bmp", contextKey: "industri_4_0", widthMm: 70, shape: "std", noDataLabel: "bukti penerapan Industri 4.0" },
+    { stateKey: "fileSdmBmp", contextKey: "pengembangan_SDM", widthMm: 70, shape: "std", noDataLabel: "bukti pengembangan sumber daya manusia industri" },
+    { stateKey: "fileSertifikatBmp", contextKey: "sertifikat_akreditasi", widthMm: 70, shape: "std", noDataLabel: "bukti kepemilikan sertifikat/akreditasi" },
+    { stateKey: "fileHijauBmp", contextKey: "industri_hijau", widthMm: 70, shape: "std", noDataLabel: "bukti penerapan industri hijau" },
+    { stateKey: "fileEksporBmp", contextKey: "nilai_ekspor", widthMm: 70, shape: "std", noDataLabel: "bukti nilai ekspor" },
+    { stateKey: "fileMerekDnBmp", contextKey: "produk_dalam_negeri", widthMm: 70, shape: "std", noDataLabel: "bukti kepemilikan produk/merek dalam negeri" },
+    { stateKey: "fileEsgBmp", contextKey: "penerapan_esg", widthMm: 70, shape: "std", noDataLabel: "bukti penerapan ESG (Environmental Social Governance)" },
+    { stateKey: "fileAwardsBmp", contextKey: "penghargaan_awards", widthMm: 70, shape: "std", noDataLabel: "bukti penghargaan/awards" },
+    { stateKey: "fileSiinasBmp", contextKey: "pelaporan_siinas", widthMm: 70, shape: "std", noDataLabel: "bukti kepatuhan pelaporan data industri pada SIINas" },
 
-    { stateKey: "fileDokumenPengembangan", contextKey: "dokumen_pengembangan", widthMm: 70, shape: "std" },
-    { stateKey: "fileAktaPendirian", contextKey: "akta_pendirian_terakhir", widthMm: 70, shape: "std" },
-    { stateKey: "fileNibRba", contextKey: "nib_rba", widthMm: 70, shape: "std" },
-    { stateKey: "fileSertifikatStandar", contextKey: "sert_standar", widthMm: 70, shape: "std" },
-    { stateKey: "fileIzinUsaha", contextKey: "izin_usaha", widthMm: 70, shape: "std" },
-    { stateKey: "fileNpwpLampiran", contextKey: "npwp_lampiran", widthMm: 70, shape: "std" },
-    { stateKey: "fileSertifikatMerek", contextKey: "sert_merek", widthMm: 70, shape: "std" },
-    { stateKey: "fileSertifikatProduk", contextKey: "sert_produk", widthMm: 70, shape: "std" },
-    { stateKey: "fileNie", contextKey: "nie", widthMm: 70, shape: "std" },
-    { stateKey: "fileBpom", contextKey: "bpom", widthMm: 70, shape: "std" },
-    { stateKey: "fileFotoProduk", contextKey: "foto_produk", widthMm: 70, shape: "std" },
-    { stateKey: "fileFotoBahanBaku", contextKey: "foto_bahan_baku", widthMm: 70, shape: "std" },
-    { stateKey: "fileInvoiceBahanBaku", contextKey: "invoice_bahan_baku", widthMm: 70, shape: "std" },
-    { stateKey: "fileAlurProsesLampiran", contextKey: "alur_proses_lampiran", widthMm: 70, shape: "std" },
-    { stateKey: "fileDaftarGaji", contextKey: "daftar_gaji", widthMm: 70, shape: "std" },
-    { stateKey: "fileSampelKtp", contextKey: "sampel_ktp", widthMm: 70, shape: "std" },
-    { stateKey: "fileStrukturPabrik", contextKey: "struktur_pabrik", widthMm: 70, shape: "std" },
-    { stateKey: "fileFotoMesin", contextKey: "foto_mesin", widthMm: 70, shape: "std" },
-    { stateKey: "fileDaftarPenyusutan", contextKey: "daftar_penyusutan", widthMm: 70, shape: "std" },
-    { stateKey: "fileBuktiListrik", contextKey: "bukti_listrik", widthMm: 70, shape: "std" },
-    { stateKey: "fileAktaSewa", contextKey: "akta_sewa", widthMm: 70, shape: "std" },
-    { stateKey: "fileGeotagging", contextKey: "geotagging", widthMm: 70, shape: "std" },
+    { stateKey: "fileDokumenPengembangan", contextKey: "dokumen_pengembangan", widthMm: 70, shape: "std", noDataLabel: "dokumen pengembangan" },
+    { stateKey: "fileAktaPendirian", contextKey: "akta_pendirian_terakhir", widthMm: 70, shape: "std", noDataLabel: "akta pendirian/perubahan terakhir" },
+    { stateKey: "fileNibRba", contextKey: "nib_rba", widthMm: 70, shape: "std", noDataLabel: "NIB RBA" },
+    { stateKey: "fileSertifikatStandar", contextKey: "sert_standar", widthMm: 70, shape: "std", noDataLabel: "sertifikat standar" },
+    { stateKey: "fileIzinUsaha", contextKey: "izin_usaha", widthMm: 70, shape: "std", noDataLabel: "surat izin operasional / izin" },
+    { stateKey: "fileNpwpLampiran", contextKey: "npwp_lampiran", widthMm: 70, shape: "std", noDataLabel: "NPWP perusahaan" },
+    { stateKey: "fileSertifikatMerek", contextKey: "sert_merek", widthMm: 70, shape: "std", noDataLabel: "sertifikat merek" },
+    { stateKey: "fileSertifikatProduk", contextKey: "sert_produk", widthMm: 70, shape: "std", noDataLabel: "sertifikat produk" },
+    { stateKey: "fileNie", contextKey: "nie", widthMm: 70, shape: "std", noDataLabel: "NIE" },
+    { stateKey: "fileBpom", contextKey: "bpom", widthMm: 70, shape: "std", noDataLabel: "BPOM" },
+    { stateKey: "fileFotoProduk", contextKey: "foto_produk", widthMm: 70, shape: "std", noDataLabel: "foto produk akhir" },
+    { stateKey: "fileFotoBahanBaku", contextKey: "foto_bahan_baku", widthMm: 70, shape: "std", noDataLabel: "foto bahan baku" },
+    { stateKey: "fileInvoiceBahanBaku", contextKey: "invoice_bahan_baku", widthMm: 70, shape: "std", noDataLabel: "invoice pembelian bahan baku" },
+    { stateKey: "fileAlurProsesLampiran", contextKey: "alur_proses_lampiran", widthMm: 70, shape: "std", noDataLabel: "alur proses produksi pabrik" },
+    { stateKey: "fileDaftarGaji", contextKey: "daftar_gaji", widthMm: 70, shape: "std", noDataLabel: "daftar gaji tenaga kerja dan kewarganegaraan" },
+    { stateKey: "fileSampelKtp", contextKey: "sampel_ktp", widthMm: 70, shape: "std", noDataLabel: "sampel dokumen identitas tenaga kerja (KTP)" },
+    { stateKey: "fileStrukturPabrik", contextKey: "struktur_pabrik", widthMm: 70, shape: "std", noDataLabel: "struktur organisasi pabrik" },
+    { stateKey: "fileFotoMesin", contextKey: "foto_mesin", widthMm: 70, shape: "std", noDataLabel: "foto alat kerja / mesin peralatan produksi" },
+    { stateKey: "fileDaftarPenyusutan", contextKey: "daftar_penyusutan", widthMm: 70, shape: "std", noDataLabel: "daftar penyusutan alat mesin" },
+    { stateKey: "fileBuktiListrik", contextKey: "bukti_listrik", widthMm: 70, shape: "std", noDataLabel: "bukti pembayaran token/listrik" },
+    { stateKey: "fileAktaSewa", contextKey: "akta_sewa", widthMm: 70, shape: "std", noDataLabel: "akta sewa/kepemilikan tempat" },
+    { stateKey: "fileGeotagging", contextKey: "geotagging", widthMm: 70, shape: "std", noDataLabel: "foto kunjungan on-site (geotagging)" },
   ];
 
   const SINGLE_IMAGE_CONFIG = [
@@ -432,13 +440,29 @@
     for (const cfg of CATEGORY_CONFIG) {
       onProgress && onProgress(`Memproses berkas: ${cfg.contextKey}...`);
       const widthUntukKategoriIni = cfg.shape === "std" ? layoutCfg.widthMm : cfg.widthMm;
-      context[cfg.contextKey] = await buildDynamicList(
+      let daftar = await buildDynamicList(
         state[cfg.stateKey],
         widthUntukKategoriIni,
         cfg.shape,
         imageJobs,
         tick
       );
+
+      // ----------------------------------------------------------------
+      // Kalau kategori ini sama sekali tidak ada berkas yang diunggah,
+      // isi 1 baris placeholder "Tidak ada <label>." -- bukan array kosong
+      // -- supaya urutan/struktur LHV tetap ikut template, hanya saja
+      // bagian yang memang tidak dimiliki perusahaan diberi keterangan
+      // eksplisit. "gambar" sengaja dikosongkan (bukan token gambar)
+      // supaya docx-engine.js tahu ini baris placeholder (lihat
+      // sanitizeMissingDataText di docx-engine.js) dan tidak menampilkan
+      // prefix "Keterangan: " di depannya.
+      // ----------------------------------------------------------------
+      if (daftar.length === 0 && cfg.noDataLabel) {
+        daftar = [{ judul: "", keterangan: `Tidak ada ${cfg.noDataLabel}.`, gambar: "" }];
+      }
+
+      context[cfg.contextKey] = daftar;
     }
 
     // --- PENANGANAN KHUSUS: foto_produk ---

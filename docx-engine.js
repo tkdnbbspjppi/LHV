@@ -160,6 +160,111 @@
   }
 
   // --------------------------------------------------------------------
+  // 2d. Sembunyikan prefix "Keterangan: " untuk baris placeholder "Tidak
+  //     ada ...".
+  //
+  //     Banyak bagian template menulis tag dengan pola tetap:
+  //       {{ baris[0].gambar }}Keterangan: {{ baris[0].keterangan }}
+  //     Kalau app-logic.js (buildContext) mengisi baris kosong dengan 1
+  //     item placeholder "Tidak ada <label>." (karena kategori itu tidak
+  //     ada berkas yang diunggah -- lihat CATEGORY_CONFIG.noDataLabel),
+  //     placeholder itu tidak punya gambar (gambar: ""), tapi teks
+  //     "Keterangan: " tetap akan tercetak di depannya kalau tidak
+  //     ditangani, jadi hasilnya "Keterangan: Tidak ada ..." -- bukan
+  //     kalimat polos seperti yang diinginkan.
+  //
+  //     Fungsi ini mengubah pola tsb secara umum (berlaku ke semua nama
+  //     variabel loop, bukan cuma "baris") menjadi:
+  //       {{ baris[0].gambar }}{% if baris[0].gambar %}Keterangan: {% endif %}{{ baris[0].keterangan }}
+  //     -- prefix "Keterangan: " hanya muncul kalau baris itu punya
+  //     gambar sungguhan (baris upload asli), dan otomatis hilang untuk
+  //     baris placeholder "Tidak ada ...". Ini transformasi RUNTIME (di
+  //     XML template, bukan di file .docx sumbernya) sehingga otomatis
+  //     berlaku untuk template TKDN mana pun yang memakai pola sama,
+  //     tanpa perlu mengedit file .docx satu per satu.
+  // --------------------------------------------------------------------
+  function sanitizeMissingDataText(xmlString) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(xmlString, "application/xml");
+    const errNode = doc.getElementsByTagName("parsererror")[0];
+    if (errNode) {
+      throw new Error("Gagal parsing XML template: " + errNode.textContent.slice(0, 300));
+    }
+
+    // Catatan: pola "{{ x.gambar }}Keterangan: {{ x.keterangan }}" di template
+    // ini SERING melintasi beberapa <w:p> (gambar & keterangan biasanya
+    // paragraf terpisah) dan label "Keterangan: " sendiri kadang terpecah
+    // jadi beberapa <w:t> (mis. "Keterangan" lalu ": " -- akibat pemeriksa
+    // ejaan Word). Supaya AMAN (tidak menggabung/memindah teks lintas
+    // paragraf, yang bisa merusak tata letak gambar+keterangan untuk baris
+    // yang datanya ASLI ada), fungsi ini TIDAK menyalin/menggabung node --
+    // ia hanya MENYISIPKAN "{% if %}" / "{% endif %}" secara presisi persis
+    // di titik sebelum & sesudah label "Keterangan: ", di node manapun titik
+    // itu berada. Tag {{ }} gambar/keterangan sendiri tidak pernah disentuh.
+    const tNodesAll = Array.from(doc.getElementsByTagName("w:t"));
+    let full = "";
+    const parts = [];
+    for (const node of tNodesAll) {
+      const text = node.textContent || "";
+      parts.push({ node, text, start: full.length, end: full.length + text.length });
+      full += text;
+    }
+
+    function insertAt(pos, text, insertions) {
+      let target = null;
+      let offset = 0;
+      for (const part of parts) {
+        if (pos > part.start && pos < part.end) {
+          target = part;
+          offset = pos - part.start;
+          break;
+        }
+        if (pos === part.start) {
+          target = part;
+          offset = 0;
+          break;
+        }
+      }
+      if (!target) {
+        for (const part of parts) {
+          if (pos === part.end) {
+            target = part;
+            offset = part.text.length;
+          }
+        }
+      }
+      if (!target) return;
+      if (!insertions.has(target.node)) insertions.set(target.node, []);
+      insertions.get(target.node).push({ offset, text });
+    }
+
+    const pattern = /(\{\{\s*([\w.\[\]]+)\.gambar\s*\}\})(Keterangan:\s*)(\{\{\s*\2\.keterangan\s*\}\})/g;
+    const insertions = new Map();
+    let m;
+    while ((m = pattern.exec(full)) !== null) {
+      const gambarTag = m[1];
+      const varPath = m[2];
+      const ketLabel = m[3];
+      const matchStart = m.index;
+      const ketStart = matchStart + gambarTag.length;
+      const ketEnd = ketStart + ketLabel.length;
+      insertAt(ketStart, `{% if ${varPath}.gambar %}`, insertions);
+      insertAt(ketEnd, `{% endif %}`, insertions);
+    }
+
+    for (const [node, edits] of insertions) {
+      edits.sort((a, b) => b.offset - a.offset);
+      let text = node.textContent || "";
+      for (const e of edits) {
+        text = text.slice(0, e.offset) + e.text + text.slice(e.offset);
+      }
+      node.textContent = text;
+    }
+
+    return new XMLSerializer().serializeToString(doc);
+  }
+
+  // --------------------------------------------------------------------
   // 3. Utilitas: dapatkan ukuran natural gambar (px) dari Blob/File
   // --------------------------------------------------------------------
   function getImageNaturalSize(blob) {
@@ -315,6 +420,7 @@
       let xml = await partFile.async("string");
       xml = mergeSplitTags(xml);
       xml = sanitizeBrokenTagNames(xml);
+      xml = sanitizeMissingDataText(xml);
       xml = hoistRowForLoops(xml);
       let rendered;
       try {
